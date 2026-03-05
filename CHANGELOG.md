@@ -1,0 +1,103 @@
+# Changelog
+
+All notable changes to Shankar's Regimen tracker are documented here.  
+Format: `[vX.Y] YYYY-MM-DD — description`
+
+---
+
+## [v1.9] 2026-03-05 — Auto day-type by weekday
+
+- Default day type now maps to schedule: Mon/Wed/Fri=Workout, Tue/Thu=Run, Sat=Sat, Sun=Sport
+- Applies on Today load and when switching dates in the 7-day date bar
+- Saved type always takes priority over default
+
+---
+
+## [v1.8] 2026-03-05 — Extras group fix (word-boundary matching)
+
+- Fixed "Run" appearing in Extras even when not needed on Workout day
+- Root cause: `includes('run')` matched "c**run**ch" in meal text
+- Fixed with `/\brun\b/i` regex for word-boundary matching
+- All 5 day types now correctly show only missing activities in Extras
+
+---
+
+## [v1.7] 2026-03-05 — 7-day date picker + Mushroom Coffee legend fix
+
+- Added scrollable 7-pill date bar at top of Today panel (last 7 days)
+- Green pills indicate days with existing logged data
+- "✎ Editing Wed Mar 4" badge shows when viewing a past day
+- All writes (checklist, meals, drinks, water) redirect to selected date key
+- Clicking Today resets to normal mode
+- Fixed Habits drinks chart subtitle: "Mushroom" → "Mushroom Coffee — daily counts"
+
+---
+
+## [v1.6] 2026-03-05 — Day-type switch guard + Extras group + Mushroom Coffee
+
+- **Day-type switch guard:** confirm dialog fires if switching day type with existing logged data
+- **Extras group:** Badminton and/or Run appear at checklist bottom when not in that day's plan
+  - Workout → Run in Extras; Run Day → Badminton in Extras; Rest/Sport → both; Sat → neither
+- Fixed drinks legend: "Mushroom" → "Mushroom Coffee"
+
+---
+
+## [v1.5] 2026-03-05 — Today subtabs + Drinks tracker + Drinks trend chart
+
+- **Today** restructured into 3 subtabs: ✅ Checklist · 🍽 Meals · ☕ Drinks
+- **Drinks tab:** Coffee (☕), Tea (🍵), Mushroom Coffee (🍄) with +/− counters
+  - Caffeine limit tracking: Coffee + Tea capped at 3/day with live label and warning
+  - Data saved per-day to localStorage
+- **Habits:** new Drinks — Last 30 Days line trend chart (3 separate lines + dashed limit line)
+- Water tracker and checklist remain in Checklist subtab
+
+---
+
+## [v1.4] 2026-03-05 — Meal select/deselect + inline detail cards
+
+- Click/tap to select a meal option → highlights pill + expands ingredient+macro card inline
+- Click/tap again → deselects and collapses card
+- Switching to another option → first deselects and closes, new one opens
+- Desktop hover still shows floating tooltip; click selects/deselects
+- Unified `handleActivate()` function replaces separate click/touch handlers
+
+---
+
+## [v1.3] 2026-03-05 — Daily macro trend chart in Habits
+
+- New "Daily Macros — Last 30 Days" line chart in Habits subtab
+- Three lines: Protein (red), Carbs (gold), Fat (blue)
+- Dashed 135g protein target reference line
+- Today's P/C/F summary with estimated calories shown below chart
+- Macros calculated from MEAL_INFO data for each logged meal
+
+---
+
+## [v1.2] 2026-03-04 — Mobile meal interactions
+
+- Mobile (touch): tap meal pill → expands inline detail card; tap again → collapses
+- Desktop (hover): floating tooltip follows cursor (unchanged)
+- Global tap-outside-to-close for open meal cards
+- Detection via `(hover: none) and (pointer: coarse)` media query
+
+---
+
+## [v1.1] 2026-03-04 — Track tab subtabs: Steps + Runs
+
+- Steps subtab: daily step counter with Log + Progress pattern, 30-day bar chart
+- Runs subtab: run logger (distance, time, feel) with pace calculation, trend charts
+- Body/Sleep/Shower/Gym/Habits all restructured to Log + Progress inner tabs
+- `showSubTab()` generic inner-tab switcher
+
+---
+
+## [v1.0] 2026-03-04 — Initial build
+
+- Complete single-file health tracker
+- Today: day-type toggle, time-blocked checklist, water tracker, meal logging
+- Track: Body, Habits (heatmap), Sleep, Shower, Gym tabs
+- Plan: Schedule, Daily template, Meals, Workout, Supplements, Rules
+- 90-day habit heatmap (Mar 4 – Jun 1, 2026)
+- Meal variety, egg count, CAVA frequency, macro split charts
+- Hand-rolled SVG charts throughout
+- localStorage persistence with `shankar_health_v1` key
