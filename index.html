@@ -3446,34 +3446,55 @@ async function pullFromCloud(){
   if(!syncCfg.token) return;
   updateSyncUI('syncing','Loading from GitHub...');
   try {
-    // Use raw URL with cache-bust to get latest without auth
-    const res = await fetch(GH_RAW + '?t=' + Date.now());
+    // Use authenticated API endpoint (more reliable than raw URL)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout
+    const res = await fetch(GH_API, {
+      signal: controller.signal,
+      headers:{ Authorization:'Bearer '+syncCfg.token, Accept:'application/vnd.github+json' }
+    });
+    clearTimeout(timeout);
     if(res.ok){
-      const cloudData = await res.json();
+      const j = await res.json();
+      _ghFileSha = j.sha; // cache SHA for next push
+      // Content is base64-encoded
+      const cloudData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
       if(cloudData && Object.keys(cloudData).length > 0){
         const local  = loadStore();
         const merged = Object.assign({}, local, cloudData);
         try{ localStorage.setItem(STORE_KEY, JSON.stringify(merged)); } catch(e){}
         lastSyncedHash = JSON.stringify(merged);
         updateSyncUI('ok','Loaded — up to date');
-        // Re-render active panels
+        // Re-derive currentType from loaded data — same hasData guard as setActiveDate
+        const _pulled = merged[activeEditKey] || {};
+        const _hasData = (_pulled.done > 0) || (_pulled.water > 0) || (_pulled.meals && Object.keys(_pulled.meals||{}).length > 0);
+        currentType = (_hasData && _pulled.type) ? _pulled.type : defaultTypeForDate(activeEditKey);
+        checked = _pulled.checked || {};
+        waterMl = _pulled.water || 0;
+        document.querySelectorAll('.dtoggle-btn').forEach(b => {
+          const t = b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+          b.classList.toggle('active', t === currentType);
+        });
         renderChecklist(); renderHeatmap(); renderMealOpts();
         buildDateBar(); renderDrinksDisplay();
         try{ renderMealCharts(); } catch(e){}
         try{ renderBodyCharts(); renderBodyDeltas(); } catch(e){}
       } else {
-        // Cloud file is empty — push local up
         await pushToCloud();
       }
     } else if(res.status === 404){
-      // data.json doesn't exist yet — push local data to create it
+      // data.json doesn't exist yet — create it
       updateSyncUI('syncing','First sync — creating data.json...');
       await pushToCloud();
     } else {
       updateSyncUI('err','Load failed: '+res.status);
     }
   } catch(e){
-    updateSyncUI('err','Offline — using local data');
+    if(e.name === 'AbortError'){
+      updateSyncUI('err','Timed out — using local data');
+    } else {
+      updateSyncUI('err','Offline — using local data');
+    }
   }
 }
 

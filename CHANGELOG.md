@@ -3,6 +3,25 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
+## [v1.14] 2026-03-05 — Fix day type reset after GitHub pull on Netlify
+
+- On Netlify, `pullFromCloud` was completing but leaving `currentType` as last-clicked tab
+- Root cause: pull merged data and called `renderChecklist()` without resetting `currentType`
+- Fix: after pull, apply same `hasData` guard to re-derive `currentType` from loaded data
+- Toggle buttons now sync to correct day type after every pull
+- Works consistently on both local file and Netlify
+
+---
+
+## [v1.13] 2026-03-05 — Fix pullFromCloud hang on Netlify
+
+- Switched pull from raw GitHub URL to authenticated API endpoint (more reliable)
+- Added 8-second AbortController timeout — no more indefinite "Loading from GitHub..." 
+- Pull now caches SHA from response, making next push faster
+- Graceful fallback: "Timed out — using local data" instead of silent hang
+
+---
+
 ## [v1.12] 2026-03-05 — Day type only persists when data is actually saved
 
 - Clicking a day type tab without entering data no longer locks that type
