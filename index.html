@@ -3149,6 +3149,18 @@ function initWkLog(){
 
 
 
+const SYNC_KEY_STORE  = 'shankar_sync_cfg';
+const GH_OWNER        = 'shankarmsy';
+const GH_REPO         = 'regimen';
+const GH_FILE         = 'data.json';
+const GH_API          = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_FILE;
+const GH_RAW          = 'https://raw.githubusercontent.com/' + GH_OWNER + '/' + GH_REPO + '/main/' + GH_FILE;
+
+let syncCfg       = {};
+let syncTimer     = null;
+let lastSyncedHash = '';
+let _ghFileSha    = null; // current SHA of data.json — required for updates
+
 // ── INIT ──
 (function(){
   const key   = todayKey();
@@ -3166,7 +3178,6 @@ function initWkLog(){
   renderBodyDeltas();
   renderWorkoutLogger();
   renderWorkoutCharts();
-  initWithSync();
   initWkLog();
 })();
 
@@ -3322,19 +3333,9 @@ function setMetric(metric, btn){
 
 
 // ── CLOUD SYNC (GitHub repo → data.json) ────────────────────────────────────────
-const SYNC_KEY_STORE  = 'shankar_sync_cfg';
-const GH_OWNER        = 'shankarmsy';
-const GH_REPO         = 'regimen';
-const GH_FILE         = 'data.json';
-const GH_API          = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_FILE;
-const GH_RAW          = 'https://raw.githubusercontent.com/' + GH_OWNER + '/' + GH_REPO + '/main/' + GH_FILE;
-
-let syncCfg       = {};
-let syncTimer     = null;
-let lastSyncedHash = '';
-let _ghFileSha    = null; // current SHA of data.json — required for updates
 
 function loadSyncCfg(){
+  if(typeof syncCfg === 'undefined') syncCfg = {};
   try { syncCfg = JSON.parse(localStorage.getItem(SYNC_KEY_STORE)) || {}; } catch(e){ syncCfg={}; }
   return syncCfg;
 }
@@ -3458,6 +3459,9 @@ async function pullFromCloud(){
       _ghFileSha = j.sha; // cache SHA for next push
       // Content is base64-encoded
       const cloudData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
+      console.log('[sync] pulled from GitHub:', JSON.stringify(cloudData).slice(0,500));
+      const todayEntry = cloudData[activeEditKey];
+      console.log('[sync] today entry:', JSON.stringify(todayEntry));
       if(cloudData && Object.keys(cloudData).length > 0){
         const local  = loadStore();
         const merged = Object.assign({}, local, cloudData);
@@ -3467,6 +3471,7 @@ async function pullFromCloud(){
         // Re-derive currentType from loaded data — same hasData guard as setActiveDate
         const _pulled = merged[activeEditKey] || {};
         const _hasData = (_pulled.done > 0) || (_pulled.water > 0) || (_pulled.meals && Object.keys(_pulled.meals||{}).length > 0);
+        console.log('[sync] activeEditKey:', activeEditKey, '_pulled:', JSON.stringify(_pulled), '_hasData:', _hasData, '→ currentType:', (_hasData && _pulled.type) ? _pulled.type : defaultTypeForDate(activeEditKey));
         currentType = (_hasData && _pulled.type) ? _pulled.type : defaultTypeForDate(activeEditKey);
         checked = _pulled.checked || {};
         waterMl = _pulled.water || 0;
@@ -3769,6 +3774,7 @@ function _renderRunLine(elId, runs){
 // ── BOOT ────────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   showMain('today');
+  initWithSync();
 });
 </script>
 </body>
