@@ -3,6 +3,26 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
+## [v1.11] 2026-03-05 — GitHub repo sync (replaces JSONBin)
+
+- Replaced JSONBin cloud sync with GitHub API sync to `shankarmsy/regimen/data.json`
+- Setup modal now asks for GitHub fine-grained PAT (token stays in localStorage only, never committed)
+- On load: pulls latest `data.json` from GitHub raw URL, merges with local data
+- On every save: debounced 2s push to GitHub API via PUT to Contents endpoint
+- First push creates `data.json` automatically (no 404 errors)
+- SHA tracking prevents GitHub API conflicts on concurrent saves
+- Each auto-save creates a git commit in your repo (`data: auto-save 2026-03-05 14:32`)
+- Pull falls back to localStorage if offline
+- "Sync Now" button for manual force-sync
+
+---
+
+## [v1.10] 2026-03-05 — Fix date bar on initial page load
+
+- Date bar pills were missing on fresh file open
+- Root cause: no boot call on page load — `buildDateBar()` only ran when navigating via tabs
+- Fix: added `DOMContentLoaded` listener that calls `showMain('today')` on startup
+
 ---
 
 ## [v1.9] 2026-03-05 — Auto day-type by weekday

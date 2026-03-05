@@ -348,21 +348,16 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
 
 <div class="settings-overlay" id="settingsOverlay">
   <div class="settings-box">
-    <div class="settings-title">Cloud Sync Setup</div>
+    <div class="settings-title">&#128279; GitHub Sync Setup</div>
     <div class="settings-sub">
-      1. Sign up free at <strong>jsonbin.io</strong><br>
-      2. API Keys tab → copy your Master Key<br>
-      3. Bins tab → New Bin → paste <code>{}</code> → Save<br>
-      4. Copy the Bin ID from the URL bar<br><br>
-      Paste both below — syncs automatically across all devices.
+      Your data saves to <strong>data.json</strong> in your GitHub repo — versioned, free, accessible from any device.<br><br>
+      1. Go to GitHub → Settings → Developer Settings → Personal Access Tokens → Fine-grained<br>
+      2. Scope to <strong>shankarmsy/regimen</strong> → Contents: Read &amp; Write<br>
+      3. Paste your token below — it stays on this device only.
     </div>
     <div class="settings-field">
-      <label class="settings-label">Master Key (starts with $2b$...)</label>
-      <input class="settings-input" id="syncMasterKey" placeholder="$2b$10$..." type="password">
-    </div>
-    <div class="settings-field">
-      <label class="settings-label">Bin ID</label>
-      <input class="settings-input" id="syncBinId" placeholder="65f3a2b8dc...">
+      <label class="settings-label">GitHub Personal Access Token</label>
+      <input class="settings-input" id="syncGhToken" placeholder="github_pat_..." type="password">
     </div>
     <div id="syncTestResult" style="font-size:10px;color:var(--muted);margin-top:8px;min-height:16px;"></div>
     <div class="settings-actions">
@@ -3328,11 +3323,18 @@ function setMetric(metric, btn){
 }
 
 
-// ── CLOUD SYNC (JSONBin.io) ──
-const SYNC_KEY_STORE = 'shankar_sync_cfg';
-let syncCfg = {};
-let syncTimer = null;
+// ── CLOUD SYNC (GitHub repo → data.json) ────────────────────────────────────────
+const SYNC_KEY_STORE  = 'shankar_sync_cfg';
+const GH_OWNER        = 'shankarmsy';
+const GH_REPO         = 'regimen';
+const GH_FILE         = 'data.json';
+const GH_API          = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + GH_FILE;
+const GH_RAW          = 'https://raw.githubusercontent.com/' + GH_OWNER + '/' + GH_REPO + '/main/' + GH_FILE;
+
+let syncCfg       = {};
+let syncTimer     = null;
 let lastSyncedHash = '';
+let _ghFileSha    = null; // current SHA of data.json — required for updates
 
 function loadSyncCfg(){
   try { syncCfg = JSON.parse(localStorage.getItem(SYNC_KEY_STORE)) || {}; } catch(e){ syncCfg={}; }
@@ -3345,8 +3347,7 @@ function saveSyncCfg(cfg){
 
 function openSettings(){
   loadSyncCfg();
-  document.getElementById('syncMasterKey').value = syncCfg.masterKey || '';
-  document.getElementById('syncBinId').value = syncCfg.binId || '';
+  document.getElementById('syncGhToken').value = syncCfg.token || '';
   document.getElementById('syncTestResult').textContent = '';
   document.getElementById('settingsOverlay').classList.add('open');
 }
@@ -3354,97 +3355,126 @@ function closeSettings(){
   document.getElementById('settingsOverlay').classList.remove('open');
 }
 
+function updateSyncUI(state, msg){
+  const dot    = document.getElementById('syncDot');
+  const status = document.getElementById('syncStatus');
+  if(dot)    dot.className = 'sync-dot ' + (state || '');
+  if(status) status.textContent = msg;
+}
+
 async function saveAndTestSync(){
-  const masterKey = document.getElementById('syncMasterKey').value.trim();
-  const binId = document.getElementById('syncBinId').value.trim();
+  const token  = document.getElementById('syncGhToken').value.trim();
   const result = document.getElementById('syncTestResult');
-  if(!masterKey || !binId){ result.textContent = 'Please fill in both fields.'; result.style.color='var(--rust)'; return; }
+  if(!token){ result.textContent = 'Please enter your GitHub token.'; result.style.color='var(--rust)'; return; }
   result.textContent = 'Testing connection...'; result.style.color='var(--muted)';
   try {
-    const res = await fetch('https://api.jsonbin.io/v3/b/'+binId+'/latest', {
-      headers:{'X-Master-Key': masterKey}
+    const res = await fetch('https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO, {
+      headers:{ Authorization:'Bearer '+token, Accept:'application/vnd.github+json' }
     });
     if(res.ok){
-      saveSyncCfg({masterKey, binId});
-      result.textContent = '✓ Connected! Syncing your data now...'; result.style.color='var(--sage)';
-      closeSettings();
-      await pushToCloud();
-      updateSyncUI('ok', 'Synced just now');
+      saveSyncCfg({ token });
+      result.textContent = '✓ Connected to shankarmsy/regimen!'; result.style.color='var(--sage)';
       document.getElementById('syncNowBtn').style.display='';
+      setTimeout(async ()=>{
+        closeSettings();
+        await pullFromCloud();
+        await pushToCloud();
+      }, 800);
     } else {
-      result.textContent = 'Connection failed — check your keys. Status: '+res.status; result.style.color='var(--rust)';
+      result.textContent = 'Auth failed — check your token. Status: '+res.status; result.style.color='var(--rust)';
     }
   } catch(e){
     result.textContent = 'Network error: '+e.message; result.style.color='var(--rust)';
   }
 }
 
-function updateSyncUI(state, msg){
-  const dot = document.getElementById('syncDot');
-  const status = document.getElementById('syncStatus');
-  dot.className = 'sync-dot '+state;
-  status.textContent = msg;
+// Get current file SHA (needed to update an existing file via GitHub API)
+async function _fetchFileSha(){
+  loadSyncCfg();
+  if(!syncCfg.token) return null;
+  try {
+    const res = await fetch(GH_API, {
+      headers:{ Authorization:'Bearer '+syncCfg.token, Accept:'application/vnd.github+json' }
+    });
+    if(res.ok){
+      const j = await res.json();
+      _ghFileSha = j.sha;
+      return j.sha;
+    }
+    if(res.status === 404) return null; // file doesn't exist yet — first push
+  } catch(e){}
+  return null;
 }
 
 async function pushToCloud(){
   loadSyncCfg();
-  if(!syncCfg.masterKey || !syncCfg.binId) return;
+  if(!syncCfg.token) return;
   const data = loadStore();
   const hash = JSON.stringify(data);
-  if(hash === lastSyncedHash) return; // no changes
-  updateSyncUI('syncing','Syncing...');
+  if(hash === lastSyncedHash) return;
+  updateSyncUI('syncing','Saving to GitHub...');
   try {
-    const res = await fetch('https://api.jsonbin.io/v3/b/'+syncCfg.binId, {
-      method:'PUT',
-      headers:{'Content-Type':'application/json','X-Master-Key':syncCfg.masterKey},
-      body: JSON.stringify(data)
+    // Always fetch latest SHA before writing
+    const sha = await _fetchFileSha();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    const body = {
+      message: 'data: auto-save ' + new Date().toISOString().slice(0,16).replace('T',' '),
+      content,
+      ...(sha ? { sha } : {})
+    };
+    const res = await fetch(GH_API, {
+      method: 'PUT',
+      headers:{ Authorization:'Bearer '+syncCfg.token, Accept:'application/vnd.github+json', 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
     });
     if(res.ok){
       lastSyncedHash = hash;
+      const j = await res.json();
+      _ghFileSha = j.content?.sha || null;
       const now = new Date();
-      updateSyncUI('ok','Synced '+now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+      updateSyncUI('ok','Saved ' + now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
     } else {
-      updateSyncUI('err','Sync failed — will retry');
+      const err = await res.json().catch(()=>({}));
+      updateSyncUI('err','Save failed: ' + (err.message||res.status));
     }
   } catch(e){
-    updateSyncUI('err','Offline — will sync when connected');
+    updateSyncUI('err','Offline — changes saved locally');
   }
 }
 
 async function pullFromCloud(){
   loadSyncCfg();
-  if(!syncCfg.masterKey || !syncCfg.binId) return;
-  updateSyncUI('syncing','Loading latest data...');
+  if(!syncCfg.token) return;
+  updateSyncUI('syncing','Loading from GitHub...');
   try {
-    const res = await fetch('https://api.jsonbin.io/v3/b/'+syncCfg.binId+'/latest', {
-      headers:{'X-Master-Key':syncCfg.masterKey}
-    });
+    // Use raw URL with cache-bust to get latest without auth
+    const res = await fetch(GH_RAW + '?t=' + Date.now());
     if(res.ok){
-      const json = await res.json();
-      const cloudData = json.record || {};
-      if(Object.keys(cloudData).length > 0){
-        // Merge: cloud wins for dates, keep local for anything not in cloud
-        const local = loadStore();
+      const cloudData = await res.json();
+      if(cloudData && Object.keys(cloudData).length > 0){
+        const local  = loadStore();
         const merged = Object.assign({}, local, cloudData);
-        saveStore(merged);
+        try{ localStorage.setItem(STORE_KEY, JSON.stringify(merged)); } catch(e){}
         lastSyncedHash = JSON.stringify(merged);
-        updateSyncUI('ok','Pulled latest — up to date');
-        // Re-render everything
-        renderChecklist();
-        renderHeatmap();
-        renderMealOpts();
-        renderMealCharts();
-        renderBodyCharts();
-        renderBodyDeltas();
+        updateSyncUI('ok','Loaded — up to date');
+        // Re-render active panels
+        renderChecklist(); renderHeatmap(); renderMealOpts();
+        buildDateBar(); renderDrinksDisplay();
+        try{ renderMealCharts(); } catch(e){}
+        try{ renderBodyCharts(); renderBodyDeltas(); } catch(e){}
       } else {
-        // Cloud is empty — push local data up
+        // Cloud file is empty — push local up
         await pushToCloud();
       }
+    } else if(res.status === 404){
+      // data.json doesn't exist yet — push local data to create it
+      updateSyncUI('syncing','First sync — creating data.json...');
+      await pushToCloud();
     } else {
-      updateSyncUI('err','Pull failed');
+      updateSyncUI('err','Load failed: '+res.status);
     }
   } catch(e){
-    updateSyncUI('err','Offline');
+    updateSyncUI('err','Offline — using local data');
   }
 }
 
@@ -3453,22 +3483,21 @@ async function forcSync(){
   await pushToCloud();
 }
 
-// Debounced auto-push after any save
+// Debounced auto-push 2s after last change
 function saveStore(data){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e){}
   if(syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(pushToCloud, 1500); // push 1.5s after last change
+  syncTimer = setTimeout(pushToCloud, 2000);
 }
 
-// On load: pull from cloud first, then init
+// On load: pull from cloud, fall back to local
 async function initWithSync(){
   loadSyncCfg();
-  if(syncCfg.masterKey && syncCfg.binId){
+  if(syncCfg.token){
     document.getElementById('syncNowBtn').style.display='';
-    updateSyncUI('syncing','Loading latest data...');
     await pullFromCloud();
   } else {
-    updateSyncUI('','Cloud sync not configured — tap Setup');
+    updateSyncUI('','GitHub sync not configured — tap Setup');
   }
 }
 
