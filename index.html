@@ -1588,7 +1588,8 @@ function showMain(tab){
   if(tab==='today') {
     activeEditKey = todayKey();
     const _s = loadStore(); const _d = _s[activeEditKey] || {};
-    currentType = _d.type || defaultTypeForDate(activeEditKey);
+    const _hasData = (_d.done > 0) || (_d.water > 0) || (_d.meals && Object.keys(_d.meals).length > 0);
+    currentType = (_hasData && _d.type) ? _d.type : defaultTypeForDate(activeEditKey);
     checked = _d.checked || {};
     waterMl = _d.water || 0;
     buildDateBar();
@@ -2170,7 +2171,8 @@ function setActiveDate(key) {
   const dayData = store[activeEditKey] || {};
   checked = dayData.checked || {};
   waterMl = dayData.water || 0;
-  currentType = dayData.type || defaultTypeForDate(activeEditKey);
+  const hasData = (dayData.done > 0) || (dayData.water > 0) || (dayData.meals && Object.keys(dayData.meals).length > 0);
+  currentType = (hasData && dayData.type) ? dayData.type : defaultTypeForDate(activeEditKey);
   // Update day-type toggle buttons
   document.querySelectorAll('.dtoggle-btn').forEach(b => {
     const t = b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
@@ -2369,23 +2371,20 @@ function setDayType(type, btn){
   const key = activeEditKey;
   const store = loadStore();
   const existing = store[key];
-  // If there's already data for a *different* type today, warn before resetting
-  if(existing && existing.type && existing.type !== type){
-    const hasData = (existing.done > 0) || (existing.water > 0);
-    if(hasData){
-      const typeName = existing.type.charAt(0).toUpperCase() + existing.type.slice(1);
-      const ok = confirm('Today is set to "' + typeName + '" and has logged data.\n\nSwitching to "' + type + '" will reset all checklist data for today.\n\nAre you sure?');
-      if(!ok) return; // abort — don't change anything
-    }
+  // If there's already data for a *different* type, warn before resetting
+  const hasData = existing && ((existing.done > 0) || (existing.water > 0) || (existing.meals && Object.keys(existing.meals||{}).length > 0));
+  if(hasData && existing.type && existing.type !== type){
+    const typeName = existing.type.charAt(0).toUpperCase() + existing.type.slice(1);
+    const ok = confirm('Today is set to "' + typeName + '" and has logged data.\n\nSwitching to "' + type + '" will reset all checklist data for today.\n\nAre you sure?');
+    if(!ok) return;
+    // Reset checked data since user confirmed
+    checked = {};
+    waterMl = 0;
+    if(store[key]) { store[key].checked = {}; store[key].water = 0; store[key].done = 0; }
+    saveStore(store);
   }
+  // Only update in memory — type is persisted to store when saveTodayData() fires
   currentType = type;
-  if(!store[key]) store[key]={};
-  store[key].type = type;
-  // Reset checked data when switching day type
-  checked = {};
-  waterMl = store[key].water || 0;
-  store[key].checked = {};
-  saveStore(store);
   document.querySelectorAll('.dtoggle-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderChecklist();

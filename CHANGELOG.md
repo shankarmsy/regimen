@@ -3,6 +3,16 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
+## [v1.12] 2026-03-05 — Day type only persists when data is actually saved
+
+- Clicking a day type tab without entering data no longer locks that type
+- Navigating away and back restores the schedule default (not the last-clicked tab)
+- Exception: if you've checked an item, logged water, or selected a meal, that type sticks
+- Type is now written to store only inside `saveTodayData()`, not on toggle click
+- Confirm dialog for switching types now also checks meals in hasData guard
+
+---
+
 ## [v1.11] 2026-03-05 — GitHub repo sync (replaces JSONBin)
 
 - Replaced JSONBin cloud sync with GitHub API sync to `shankarmsy/regimen/data.json`
