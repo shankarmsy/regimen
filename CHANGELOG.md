@@ -3,6 +3,24 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
+## [v1.17] 2026-03-05 — Date bar order: Today first, older dates right
+
+- Reversed date pill order: Today → Wed → Tue → Mon → Sun → Sat → Fri
+- Single loop direction change in `buildDateBar()`
+
+---
+
+## [v1.16] 2026-03-05 — Production release: GitHub sync fully working
+
+- Removed debug console logs
+- Fixed `syncCfg` ReferenceError: sync variables moved before IIFE
+- `initWithSync()` moved to `DOMContentLoaded` — never called from IIFE
+- `loadSyncCfg()` made null-safe for early calls
+- Repo made public on GitHub to fix Netlify contributor limit on free plan
+- GitHub sync, day type defaults, date picker all working on Netlify
+
+---
+
 ## [v1.15] 2026-03-05 — Fix day type button and default on page load
 
 - Root cause: two competing init systems (IIFE + DOMContentLoaded) with inconsistent logic

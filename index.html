@@ -2193,7 +2193,7 @@ function buildDateBar() {
   const store = loadStore();
   const now = new Date(); now.setHours(0,0,0,0);
   bar.innerHTML = '';
-  for (let i = 6; i >= 0; i--) {
+  for (let i = 0; i <= 6; i++) {
     const d = new Date(now); d.setDate(d.getDate() - i);
     const key = dateToKey(d);
     const isToday = (i === 0);
@@ -3459,9 +3459,6 @@ async function pullFromCloud(){
       _ghFileSha = j.sha; // cache SHA for next push
       // Content is base64-encoded
       const cloudData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
-      console.log('[sync] pulled from GitHub:', JSON.stringify(cloudData).slice(0,500));
-      const todayEntry = cloudData[activeEditKey];
-      console.log('[sync] today entry:', JSON.stringify(todayEntry));
       if(cloudData && Object.keys(cloudData).length > 0){
         const local  = loadStore();
         const merged = Object.assign({}, local, cloudData);
@@ -3471,7 +3468,6 @@ async function pullFromCloud(){
         // Re-derive currentType from loaded data — same hasData guard as setActiveDate
         const _pulled = merged[activeEditKey] || {};
         const _hasData = (_pulled.done > 0) || (_pulled.water > 0) || (_pulled.meals && Object.keys(_pulled.meals||{}).length > 0);
-        console.log('[sync] activeEditKey:', activeEditKey, '_pulled:', JSON.stringify(_pulled), '_hasData:', _hasData, '→ currentType:', (_hasData && _pulled.type) ? _pulled.type : defaultTypeForDate(activeEditKey));
         currentType = (_hasData && _pulled.type) ? _pulled.type : defaultTypeForDate(activeEditKey);
         checked = _pulled.checked || {};
         waterMl = _pulled.water || 0;
