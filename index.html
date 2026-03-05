@@ -3717,6 +3717,11 @@ function _renderRunLine(elId, runs){
   svg += '</svg>';
   el.innerHTML = '<div style="overflow-x:auto">' + svg + '</div>';
 }
+
+// ── BOOT ────────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  showMain('today');
+});
 </script>
 </body>
 </html>
