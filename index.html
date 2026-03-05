@@ -1592,6 +1592,10 @@ function showMain(tab){
     currentType = (_hasData && _d.type) ? _d.type : defaultTypeForDate(activeEditKey);
     checked = _d.checked || {};
     waterMl = _d.water || 0;
+    document.querySelectorAll('.dtoggle-btn').forEach(b => {
+      const t = b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+      b.classList.toggle('active', t === currentType);
+    });
     buildDateBar();
     renderMealOpts(); renderChecklist(); renderDrinksDisplay();
   }
@@ -3147,18 +3151,13 @@ function initWkLog(){
 
 // ── INIT ──
 (function(){
-  const day = new Date().getDay();
-  const map = {0:'sport',1:'workout',2:'run',3:'workout',4:'run',5:'workout',6:'sat'};
-  currentType = map[day]||'workout';
-  const key = todayKey();
+  const key   = todayKey();
   const store = loadStore();
-  if(store[key]){ checked=store[key].checked||{}; waterMl=store[key].water||0; if(store[key].type) currentType=store[key].type; }
-  const typeLabels = {workout:'Workout',run:'Run',sat:'Sat',sport:'Volleyball',rest:'Rest'};
-  document.querySelectorAll('.dtoggle-btn').forEach(b=>{
-    const match = Object.entries(typeLabels).find(([k,v])=>b.textContent.includes(v));
-    if(match && match[0]===currentType) b.classList.add('active');
-    else b.classList.remove('active');
-  });
+  const day   = store[key] || {};
+  const hasData = (day.done > 0) || (day.water > 0) || (day.meals && Object.keys(day.meals||{}).length > 0);
+  currentType = (hasData && day.type) ? day.type : defaultTypeForDate(key);
+  checked  = day.checked || {};
+  waterMl  = day.water   || 0;
   renderChecklist();
   renderHeatmap();
   renderMealOpts();

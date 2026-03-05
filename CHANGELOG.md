@@ -3,6 +3,17 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
+## [v1.15] 2026-03-05 — Fix day type button and default on page load
+
+- Root cause: two competing init systems (IIFE + DOMContentLoaded) with inconsistent logic
+- Old IIFE had its own day-of-week map and set type from store without hasData guard
+- Fixed IIFE to use `defaultTypeForDate()` and same hasData guard as rest of app
+- `showMain('today')` now explicitly syncs toggle buttons after setting currentType
+- Pull-from-GitHub also syncs toggle buttons after merge
+- Result: Thu always shows Run Day on load unless workout data was actually saved
+
+---
+
 ## [v1.14] 2026-03-05 — Fix day type reset after GitHub pull on Netlify
 
 - On Netlify, `pullFromCloud` was completing but leaving `currentType` as last-clicked tab
