@@ -329,7 +329,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
   <h1>Shankar's<br><em>Fuel, Move</em><br>&amp; Repair Plan</h1>
   <p class="masthead-sub">Meals · Workouts · Water · Coffee · Sleep · Daily Checklist · 90-Day Progress<br>2Bros Plan · Eating 8:15am–6:00pm · Liver-first · 174&#8594;160 lbs · Day 1: Mar 4</p>
   <div class="target-strip">
-    <div class="target-item"><span class="target-val">~1,600</span><span class="target-label">Calories/day</span></div>
+    <div class="target-item"><span class="target-val">1,900–1,950</span><span class="target-label">Calories/day</span></div>
     <div class="target-item"><span class="target-val">130–145g</span><span class="target-label">Protein</span></div>
     <div class="target-item"><span class="target-val">2.7L+</span><span class="target-label">Water daily</span></div>
     <div class="target-item"><span class="target-val">3</span><span class="target-label">Caffeine drinks</span></div>
@@ -1248,6 +1248,16 @@ const MEAL_INFO = {
     ingredients:[['Avocado','½'],['Almonds / walnuts','25g'],['Salt, lemon','pinch']],
     macros:{P:'6g',C:'10g',F:'22g',Cal:'~260'}
   },
+  'Whey shake+avocado': {
+    emoji:'🥑', color:'#3a6a3a',
+    ingredients:[['Whey protein','1 scoop'],['A2 milk or water','300ml'],['Avocado','½'],['Chia seeds (soaked)','1 tbsp']],
+    macros:{P:'30g',C:'14g',F:'16g',Cal:'~320'}
+  },
+  'Greek yogurt+berries': {
+    emoji:'🫙', color:'#5a8a9a',
+    ingredients:[['Greek yogurt (full fat)','1 cup'],['Mixed berries','½ cup'],['Honey','1 tsp']],
+    macros:{P:'18g',C:'20g',F:'8g',Cal:'~220'}
+  },
   'Skipped': {
     emoji:'⏭️', color:'#d4c8b4',
     ingredients:[['—','—']],
@@ -1673,13 +1683,13 @@ function show(id){
 const MEAL_OPTS = {
   bf: ['Omelette/bhurji/scrambled','Power oatmeal','Bread+eggs (2)','Bread+eggs (4)','Bread+eggs+avocado'],
   lunch: ['Chicken+rice','Dal+veggies+rice','Rajma/channa','CAVA'],
-  snack: ['Whey shake+nuts','Oatmeal+fruit','Avocado+nuts','Skipped'],
+  snack: ['Whey shake+avocado','Greek yogurt+berries','Whey shake+nuts','Avocado+nuts','Oatmeal+fruit','Skipped'],
   dinner: ['Chicken+rice','Rice+eggs','Eggs only','Oatmeal']
 };
 
 const MEAL_COLORS = {
   'Chicken+rice':'#c4440a','Dal+veggies+rice':'#5a7a5a','Rajma/channa':'#c89b3c',
-  'CAVA':'#1d4e89','Omelette/bhurji/scrambled':'#7c3f00','Power oatmeal':'#5a7a5a',
+  'CAVA':'#1d4e89','Omelette/bhurji/scrambled':'#7c3f00','Power oatmeal':'#5a7a5a','Whey shake+avocado':'#3a6a3a','Greek yogurt+berries':'#5a8a9a',
   'Bread+eggs (2)':'#8a7a6a','Bread+eggs (4)':'#8a7a6a','Bread+eggs+avocado':'#3a6a3a',
   'Whey shake+nuts':'#c4440a','Oatmeal+fruit':'#5a7a5a','Avocado+nuts':'#3a6a3a',
   'Skipped':'#d4c8b4','Rice+eggs':'#c89b3c','Eggs only':'#7c3f00','Oatmeal':'#5a7a5a'
@@ -1687,7 +1697,7 @@ const MEAL_COLORS = {
 
 const EGG_MEALS = {
   'Omelette/bhurji/scrambled':4,'Bread+eggs (2)':2,'Bread+eggs (4)':4,
-  'Bread+eggs+avocado':3,'Rice+eggs':2,'Eggs only':3,'Avocado toast + eggs':3,
+  'Bread+eggs+avocado':3,'Rice+eggs':2,'Eggs only':3,'Avocado toast + eggs':3,'Whey shake+avocado':1,'Greek yogurt+berries':1,
   'PB toast + boiled eggs':3
 };
 
@@ -3535,7 +3545,7 @@ function skeletonBarChart(elId, rows, note){
 function skeletonLineChart(elId, note){
   const el = document.getElementById(elId);
   if(!el) return;
-  el.innerHTML = '<div class="skeleton-chart"><div class="skeleton-line"></div><div class="skeleton-note">'+(note||'Log Sunday measurements to see trend')+'</div></div>';
+  el.innerHTML = '<div class="skeleton-chart"><div class="skeleton-line"></div><div class="skeleton-note">'+(note||'Log Saturday measurements to see trend')+'</div></div>';
 }
 
 

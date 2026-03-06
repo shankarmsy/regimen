@@ -3,6 +3,15 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
+## [v1.18] 2026-03-05 — Calorie target + new snack options
+
+- Calorie target updated: ~1,600 → 1,900–1,950 cal/day
+- Added snack option: Whey shake+avocado (1 scoop whey + ½ avocado + chia, ~320 cal, 30g P)
+- Added snack option: Greek yogurt+berries (1 cup Greek yogurt + berries + honey, ~220 cal, 18g P)
+- Body measurements subtext updated: Sunday → Saturday
+
+---
+
 ## [v1.17] 2026-03-05 — Date bar order: Today first, older dates right
 
 - Reversed date pill order: Today → Wed → Tue → Mon → Sun → Sat → Fri
