@@ -3,6 +3,19 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
+## [v1.19] 2026-03-05 — Meal card updates
+
+- Bread+eggs (2): added ½ avocado (~350 cal, 18g P)
+- Omelette: added optional bread (2 slices) OR ½ avocado
+- Dal+veggies+rice: rice increased ½ → ¾ cup (~380 cal)
+- Rajma/channa: added optional ½ cup yogurt OR ½ avocado
+- Greek yogurt+berries: added optional 10g nuts OR 1 tbsp chia (~260 cal)
+- Eggs only: added ½ avocado (~410 cal, 30g P)
+- Plain Oatmeal: added 20g mixed nuts (~330 cal)
+- Removed: Oatmeal+fruit (from snack options, MEAL_INFO, colors, CARB_MEALS)
+
+---
+
 ## [v1.18] 2026-03-05 — Calorie target + new snack options
 
 - Calorie target updated: ~1,600 → 1,900–1,950 cal/day
