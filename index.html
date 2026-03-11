@@ -2906,10 +2906,8 @@ function saveTodayData(){
   });
   // Preserve meals data already on this key
   const meals = store[key].meals;
-  const eggs = store[key].eggs;
   store[key] = { type:currentType, checked:{...checked}, water:waterMl, eggs:eggsCtr, total, done, score: total>0?Math.round(done/total*100):0 };
   if(meals) store[key].meals = meals;
-  if(eggs) store[key].eggs = eggs;
   saveStore(store);
   buildDateBar(); // refresh has-data indicators
   renderHeatmap();
@@ -3018,6 +3016,7 @@ function addEggs(n){
   eggsCtr = Math.max(0, (eggsCtr || 0) + n);
   updateEggDisplay();
   updateCalorieDisplay();
+  saveTodayData();
 }
 
 function updateEggDisplay(){
