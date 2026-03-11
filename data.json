@@ -69,15 +69,15 @@
       "Afternoon-1": true
     },
     "water": 2000,
-    "eggs": 0,
+    "eggs": 4,
     "total": 23,
     "done": 10,
     "score": 43,
     "meals": {
-      "bf": "Bread+4 eggs+½ avocado",
       "lunch": "Dal+veggies+rice",
       "snack": "Whey 2sc+avocado+nuts+spinach",
-      "dinner": "Chicken+rice"
+      "dinner": "Chicken+rice",
+      "bf": "Bread+4 eggs+½ avocado"
     }
   },
   "drinks_2026-03-11": {
