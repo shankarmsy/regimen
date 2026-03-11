@@ -2,10 +2,10 @@ Here's a full summary you can paste into a new window:
 
 ---
 
-## Regimen App — Session Summary (Mar 5–10, 2026)
+## Regimen App — Session Summary (Mar 5–11, 2026)
 
 ### What is Regimen?
-A personal health tracker web app built as a single `index.html` file. Live at `https://shankarmsy.github.io/regimen`. Repo: `github.com/shankarmsy/regimen` (public). Currently at **v1.19**.
+A personal health tracker web app built as a single `index.html` file. Live at `https://shankarmsy.github.io/regimen`. Repo: `github.com/shankarmsy/regimen` (public). Currently at **v1.20**.
 
 ---
 
@@ -18,11 +18,10 @@ A personal health tracker web app built as a single `index.html` file. Live at `
 
 ### Git workflow
 ```bash
-git add index.html CHANGELOG.md
-git commit -m "vX.XX — description"
-git push
+git add index.html CHANGELOG.md data.json chat_summary.md
+git commit -m "v1.20 — description"
+git push --force
 ```
-Force push needed if app has auto-saved data to repo since last push: `git push --force`
 
 ---
 
@@ -38,10 +37,58 @@ Schedule defaults: Mon/Wed/Fri = Workout, Tue/Thu = Run, Sat = Sat (workout+run)
 - On page load and after GitHub pull, `hasData` guard re-derives type: only restores saved type if `done > 0`, `water > 0`, or meals logged
 
 ### GitHub Sync
-- `pullFromCloud()` — authenticated GET to GitHub API on load, 8s timeout, decodes base64 content, merges with localStorage (cloud wins), re-derives `currentType` after merge
+- `pullFromCloud()` — authenticated GET to GitHub API on load, 8s timeout, decodes base64 content, merges with localStorage (cloud wins)
 - `pushToCloud()` — debounced 2s after save, fetches SHA first, PUT to GitHub API with base64-encoded JSON
-- Sync vars (`syncCfg`, `GH_API`, etc.) declared before IIFE
-- `initWithSync()` called from `DOMContentLoaded`, never from IIFE
+- Sync vars declared before IIFE
+- `initWithSync()` called from `DOMContentLoaded`
+
+---
+
+## v1.20 Changes (Mar 10–11, 2026)
+
+### Water Tracking
+- **Units changed:** 300ml → 500ml per checklist item
+- **Auto-sync:** Checking "Water 500ml" items automatically adds 500ml to water counter
+- **Uncheck:** Unchecking water items subtracts 500ml (min 0)
+- Manual +/- buttons (Cup 500ml, Bottle 1L) still work independently
+
+### Eggs Tracking (2 Places)
+- **Checklist:** Counter below water section with +/− buttons
+  - Auto-populates from breakfast selection (Omelette→4, Bread+eggs(4)→4, Bread+eggs+avocado→3, Rice+eggs→3, Eggs only→5)
+  - Deselecting breakfast resets to 0
+  - Persists in storage under `eggs` key
+- **Habits chart:** Daily Egg Count (last 30 days)
+  - Bar chart showing daily egg totals from all logged meals
+  - Auto-calculated from meal data
+
+### Sleep & Steps: Yesterday Tracking
+- Both now log yesterday's data (for morning logging)
+- `sleepDayKey()` defaults to `yesterdayKey()`
+- `stepsKey()` defaults to `yesterdayKey()`
+- Labels updated: "Tonight's Sleep" → "Yesterday's Sleep", "Today's Steps" → "Yesterday's Steps"
+
+### Badminton Sleep Auto-Adjust
+- **Sleep time display** in Track > Sleep log section
+- If badminton was done YESTERDAY (in plan OR checked as extra): **11:15pm** (rust color)
+- Otherwise: **10:15pm** (purple color)
+- Checks: (1) Is badminton in yesterday's day plan? (2) Was extra badminton checked yesterday?
+- Updates automatically when toggling badminton
+
+### Meals Updated
+- **Removed:** Bread+eggs (4), Avocado+nuts, Skipped
+- **A2 milk → Almond milk:** Whey shake+nuts, Whey shake+avocado, Oatmeal
+- **EGG_MEALS map:** Tracks eggs per meal for chart calculation
+
+### Data Cleanup (One-Time on v1.20 Upgrade)
+- Runs in `DOMContentLoaded` before app initializes
+- Uses `_v120_cleaned` flag to run only once
+- Keeps today's data + sets flag; deletes all pre-today entries
+- Today's data (meals, water, drinks, checklist) 100% preserved
+- Prevents daily wipes on page reload
+
+### Data Persistence
+- `saveTodayData()` now preserves `eggs` value alongside `meals` and `drinks`
+- `resetAll()` resets `eggsCtr = 0` alongside `waterMl = 0`
 
 ---
 
@@ -88,21 +135,36 @@ All recurring, Central Time, popup notifications:
 
 ---
 
-### Version History (this session)
+### Version History
 - **v1.12** — Day type only persists on actual data save
 - **v1.13** — pullFromCloud: authenticated API + 8s timeout
-- **v1.14** — Fix currentType reset after GitHub pull on Netlify
+- **v1.14** — Fix currentType reset after GitHub pull
 - **v1.15** — Fix IIFE day type defaults, showMain syncs buttons
 - **v1.16** — Production release, debug logs removed
 - **v1.17** — Date bar: Today first, older dates descending right
 - **v1.18** — Calorie target 1,900–1,950, new snack options
 - **v1.19** — Meal card updates (avocado additions, dal rice, removed Oatmeal+fruit)
+- **v1.20** — Water 500ml units, Eggs checklist + daily chart, Yesterday sleep/steps, Badminton sleep auto-adjust, Data cleanup
+
+---
+
+### Code Locations (v1.20)
+- `MEAL_OPTS` — line ~1709 (breakfast/lunch/snack/dinner options)
+- `MEAL_INFO` — line ~1190 (ingredient cards)
+- `EGG_MEALS` — line ~1741 (egg counts per meal)
+- `DAYS` — line ~2239 (checklist schedule per day type)
+- `toggleItem()` — water add/subtract logic on check/uncheck
+- `addEggs(n)` / `updateEggDisplay()` — egg counter functions
+- `yesterdayKey()` — after `todayKey()` definition
+- `updateSleepTimeDisplay()` — checks yesterday for badminton, updates sleep time
+- `saveTodayData()` — preserves eggs
+- `DOMContentLoaded` — one-time data cleanup with `_v120_cleaned` flag
 
 ---
 
 ### Known Good Patterns
-- Always validate with `node -e "new Function(...)"` after JS changes
-- Use `playwright` headless browser for behavioral testing
-- Body measurement subtext says "Saturday" (was Sunday)
-- Netlify was deleted — GitHub Pages is the only host now
-- JSONBin was never used (replaced before any data entered)
+- Always validate JS: `node -e "new Function(require('fs').readFileSync('index.html','utf8').match(/<script[^>]*>([\s\S]*)<\/script>/)[1])"`
+- GitHub Pages auto-deploys in ~30 seconds after push
+- PAT stored in localStorage only, never committed
+- `shankar_health_v1` is the localStorage key
+- Force push if app has auto-saved data since last push
