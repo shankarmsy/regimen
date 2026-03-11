@@ -66,13 +66,14 @@
       "Afternoon-0": true,
       "Morning-3": true,
       "Afternoon-2": true,
-      "Afternoon-1": true
+      "Afternoon-1": true,
+      "Afternoon-3": true
     },
     "water": 2000,
     "eggs": 4,
     "total": 23,
-    "done": 10,
-    "score": 43,
+    "done": 11,
+    "score": 48,
     "meals": {
       "lunch": "CAVA",
       "snack": "Whey 2sc+avocado+nuts+spinach",
@@ -80,7 +81,7 @@
     }
   },
   "drinks_2026-03-11": {
-    "coffee": 0,
+    "coffee": 1,
     "tea": 0,
     "mushroom": 1
   },
