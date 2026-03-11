@@ -1305,16 +1305,15 @@ const MEAL_INFO = {
     ingredients:[['Greens / grains base','1 bowl'],['Chicken or falafel','1 serving'],['Hummus, tzatziki','2 tbsp'],['Veggies, feta','to taste']],
     macros:{P:'35g',C:'38g',F:'14g',Cal:'~420'}
   },
-  'Whey shake+nuts': {
-    emoji:'🥤', color:'#c4440a',
-    ingredients:[['Whey protein','1–2 scoops'],['Almond milk or water','300ml'],['Mixed nuts','20g']],
-    macros:{P:'32g',C:'10g',F:'10g',Cal:'~260'}
+  'Whey 2sc+avocado+nuts+spinach': {
+    emoji:'🥤', color:'#3a6a3a',
+    ingredients:[['Whey protein','2 scoops'],['Almond milk','300ml'],['Avocado','½'],['Mixed nuts','20g'],['Fresh spinach','handful'],['Chia seeds (soaked)','1 tbsp']],
+    macros:{P:'45g',C:'16g',F:'26g',Cal:'~460'}
   },
-
-  'Whey shake+avocado': {
-    emoji:'🥑', color:'#3a6a3a',
-    ingredients:[['Whey protein','1 scoop'],['Almond milk or water','300ml'],['Avocado','½'],['Chia seeds (soaked)','1 tbsp']],
-    macros:{P:'30g',C:'14g',F:'16g',Cal:'~320'}
+  'Whey 2sc+nuts+spinach': {
+    emoji:'🥤', color:'#5a7a5a',
+    ingredients:[['Whey protein','2 scoops'],['Almond milk','300ml'],['Mixed nuts','20g'],['Fresh spinach','handful'],['Chia seeds (soaked)','1 tbsp']],
+    macros:{P:'40g',C:'12g',F:'20g',Cal:'~390'}
   },
   'Greek yogurt+berries': {
     emoji:'🫙', color:'#5a8a9a',
@@ -1972,15 +1971,14 @@ function show(id){
 const MEAL_OPTS = {
   bf: ['Omelette (4 eggs)','Power oatmeal','Bread+2 eggs+½ avocado','Bread+4 eggs+½ avocado'],
   lunch: ['Chicken+rice','Dal+veggies+rice','Rajma/channa','CAVA'],
-  snack: ['Whey shake+avocado','Greek yogurt+berries','Whey shake+nuts'],
+  snack: ['Whey 2sc+avocado+nuts+spinach','Whey 2sc+nuts+spinach'],
   dinner: ['Chicken+rice','Rice+eggs','Eggs only','Oatmeal']
 };
 
 const MEAL_COLORS = {
   'Chicken+rice':'#c4440a','Dal+veggies+rice':'#5a7a5a','Rajma/channa':'#c89b3c',
-  'CAVA':'#1d4e89','Omelette (4 eggs)':'#7c3f00','Power oatmeal':'#5a7a5a','Whey shake+avocado':'#3a6a3a','Greek yogurt+berries':'#5a8a9a',
+  'CAVA':'#1d4e89','Omelette (4 eggs)':'#7c3f00','Power oatmeal':'#5a7a5a','Whey 2sc+avocado+nuts+spinach':'#3a6a3a','Whey 2sc+nuts+spinach':'#5a7a5a','Greek yogurt+berries':'#5a8a9a',
   'Bread+2 eggs+½ avocado':'#8a7a6a','Bread+4 eggs+½ avocado':'#3a6a3a',
-  'Whey shake+nuts':'#c4440a',
   'Rice+eggs':'#c89b3c','Eggs only':'#7c3f00','Oatmeal':'#5a7a5a'
 };
 
@@ -1989,7 +1987,7 @@ const EGG_MEALS = {
   'Bread+4 eggs+½ avocado':4,'Rice+eggs':3,'Eggs only':5
 };
 
-const PROTEIN_MEALS = ['Chicken+rice','CAVA','Rice+eggs','Eggs only','Whey shake+nuts'];
+const PROTEIN_MEALS = ['Chicken+rice','CAVA','Rice+eggs','Eggs only','Whey 2sc+avocado+nuts+spinach','Whey 2sc+nuts+spinach'];
 const CARB_MEALS = ['Dal+veggies+rice','Rajma/channa','Power oatmeal','Oatmeal'];
 
 function _mealOptClass(opt, isSelected) {
@@ -2917,6 +2915,15 @@ function saveTodayData(){
   const meals = store[key].meals;
   store[key] = { type:currentType, checked:{...checked}, water:waterMl, eggs:eggsCtr, total, done, score: total>0?Math.round(done/total*100):0 };
   if(meals) store[key].meals = meals;
+  
+  // VALIDATION: Check what we're saving
+  if(store[key].eggs !== eggsCtr) {
+    throw new Error('Egg save failed: eggsCtr=' + eggsCtr + ' but store[key].eggs=' + store[key].eggs);
+  }
+  if(!store[key].meals && meals) {
+    throw new Error('Meal save failed: meals were lost');
+  }
+  
   saveStore(store);
   buildDateBar(); // refresh has-data indicators
   renderHeatmap();

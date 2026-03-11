@@ -3,7 +3,27 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
-## [v1.20] 2026-03-10 — Eggs tracking in checklist + Habits chart, 500ml water units, yesterday sleep/steps, badminton sleep auto-adjust
+## [v1.20] 2026-03-11 — Eggs tracking, snack refresh, chart trimming, egg protein fix
+
+- **Egg counter persistence:** Fixed egg counter being cleared on refresh or tab switch. Eggs now persist through reload and properly sync to storage.
+- **Breakfast meal egg selection:** Selecting breakfast with eggs (e.g., "Bread+2 eggs+½ avocado") now correctly sets baselineEggs. When you add extra eggs manually, they're counted separately in protein calculation.
+- **Snack options updated:**
+  - `Whey 2sc+avocado+nuts+spinach` — 45g protein, 460 cal
+  - `Whey 2sc+nuts+spinach` — 40g protein, 390 cal  
+  - Removed: Greek yogurt+berries, old Whey shake options
+- **Snack section restored:** Added missing "What did you have?" label in snack checklist section. Snacks now visible at 3:15pm in afternoon checklist (all day types).
+- **All charts trim empty days:** Sleep, Weight, Steps, Shower, Drinks, Eggs charts now trim leading empty days and start from first data point.
+- **Calorie targets updated:**
+  - Protein: 145g (580 cal)
+  - Carbs: 160g (640 cal)
+  - Fat: 70g (630 cal)
+  - Total: 1850 cal
+- **Egg protein calculation:** Extra eggs beyond breakfast selection now correctly add protein to daily total (6g per extra egg).
+- **Console logging:** Fixed egg calculation debug log to show actual values instead of object.
+
+---
+
+## [v1.20-prev] 2026-03-10 — Eggs tracking in checklist + Habits chart, 500ml water units, yesterday sleep/steps, badminton sleep auto-adjust
 
 - **Sleep time auto-adjust:** If Badminton checked (8-10:30pm), sleep time updates to 11:15pm (rust color). Default 10:15pm (purple).
   - Works for built-in Badminton items (Sat day type, Workout/Run days)
