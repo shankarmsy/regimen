@@ -639,7 +639,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
     <div id="mealVarietyChart"></div>
   </div>
   <div class="chart-wrap">
-    <div class="chart-title">Weekly Egg Count</div>
+    <div class="chart-title">Daily Egg Count</div>
     <div class="chart-sub">Total eggs across all meals per week</div>
     <div id="eggChart"></div>
   </div>
@@ -1340,45 +1340,37 @@ function setSleepQuality(q,btn){
   btn.style.background=c[q]; btn.style.color='#fff'; btn.style.borderColor=c[q];
 }
 function updateSleepTimeDisplay(){
-  // Sleep log shows yesterday's sleep, but needs to check the date being viewed (activeEditKey) for badminton
-  // activeEditKey is the date currently selected in the calendar
+  // Sleep log is for YESTERDAY, so check yesterday's badminton
   const store = loadStore();
-  const viewingDate = activeEditKey; // The date we're viewing (could be today, yesterday, or any day)
-  const viewingData = store[viewingDate]; // Get that day's data
+  const yesterdayDate = yesterdayKey(); // Always yesterday for sleep log
+  const yesterdayData = store[yesterdayDate] || {};
+  const dayType = yesterdayData.type || defaultTypeForDate(yesterdayDate);
+  const dayPlan = DAYS[dayType] || {};
   
   let hasBadminton = false;
   
-  if(viewingData && viewingData.checked) {
-    // Check if any badminton item was checked on the viewing date
-    hasBadminton = Object.keys(viewingData.checked).some(key => {
-      // Check if this key corresponds to a badminton item
-      if(key === 'extra-badminton') return true;
-      // Also check if it's a built-in badminton from the day type
-      const match = key.match(/^(\w+)-(\d+)$/);
-      if(match) {
-        const dayType = viewingData.type; // Get the day type (run, workout, etc)
-        const data = DAYS[dayType];
-        if(data) {
-          const [group, idx] = [match[1], parseInt(match[2])];
-          const item = data[group] && data[group][idx];
-          if(item && /\bbadminton\b/i.test(item.text)) return true;
-        }
-      }
-      return false;
-    });
+  // Check 1: Is badminton in yesterday's plan?
+  if(dayPlan) {
+    const allItems = Object.values(dayPlan).flat();
+    if(allItems.some(it => /\bbadminton\b/i.test(it.text))) {
+      hasBadminton = true;
+    }
+  }
+  
+  // Check 2: Was extra badminton checked yesterday?
+  if(!hasBadminton && yesterdayData.checked && yesterdayData.checked['extra-badminton']) {
+    hasBadminton = true;
   }
   
   const display = document.getElementById('sleepTimeDisplay');
   if(!display) return;
   
-  // If badminton was done on the viewing date, sleep time is 11:15pm
-  // Otherwise standard sleep time is 10:15pm
   if(hasBadminton) {
     display.textContent = '11:15pm';
-    display.style.color = '#c4440a'; // Rust color for late night
+    display.style.color = '#c4440a';
   } else {
     display.textContent = '10:15pm';
-    display.style.color = '#4a3f7c'; // Purple color for normal
+    display.style.color = '#4a3f7c';
   }
 }
 
@@ -1397,7 +1389,7 @@ function loadSleepToday(){
   const inp=document.getElementById('sleepHrsInput'); if(!inp) return;
   if(d){inp.value=d.hrs;_sleepQ=d.quality||'ok';}else{inp.value='';_sleepQ='';}
   updateSleepPreview();
-  updateSleepTimeDisplay();
+  setTimeout(()=>updateSleepTimeDisplay(), 50); // Ensure DOM is ready
   if(_sleepQ){
     document.querySelectorAll('.sleep-q-btn').forEach(b=>{if(b.textContent.trim().toLowerCase()===_sleepQ) setSleepQuality(_sleepQ,b);});
   }
@@ -1989,7 +1981,7 @@ function renderMealCharts(){
   // ── EGG CHART ──
   const now2 = new Date();
   const d30ago = new Date(now2); d30ago.setDate(d30ago.getDate()-30);
-  const weeklyEggs = {};
+  const dailyEggs = {}; // Changed from weeklyEggs to dailyEggs
   const weeklyCava = {};
   const macroSplit = {protein:0, carb:0, mixed:0};
   let d = new Date(d30ago);
@@ -2003,7 +1995,7 @@ function renderMealCharts(){
       ['bf','lunch','snack','dinner'].forEach(slot => {
         if(m[slot] && EGG_MEALS[m[slot]]) dayEggs += EGG_MEALS[m[slot]];
       });
-      if(dayEggs > 0) weeklyEggs[wk] = (weeklyEggs[wk]||0) + dayEggs;
+      if(dayEggs > 0) dailyEggs[k] = dayEggs; // Store daily, not weekly
       if(m.lunch === 'CAVA') weeklyCava[wk] = (weeklyCava[wk]||0) + 1;
       const lunch = m.lunch||''; const dinner = m.dinner||'';
       const isProtein = PROTEIN_MEALS.includes(lunch)||PROTEIN_MEALS.includes(dinner);
@@ -2014,7 +2006,7 @@ function renderMealCharts(){
     }
     d.setDate(d.getDate()+1);
   }
-  renderWeeklyBar('eggChart', weeklyEggs, 'eggs', '#c4440a');
+  renderWeeklyBar('eggChart', dailyEggs, 'eggs', '#c4440a');
   renderWeeklyBar('cavaChart', weeklyCava, 'times', '#1d4e89');
   renderMacroSplit('macroSplitChart', macroSplit);
   renderMacroTrend('macroTrendChart');
@@ -2254,7 +2246,6 @@ function setActiveDate(key) {
   renderChecklist();
   renderMealOpts();
   renderDrinksDisplay();
-  updateSleepTimeDisplay(); // Update sleep time when switching dates
 }
 
 function buildDateBar() {
