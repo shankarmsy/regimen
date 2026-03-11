@@ -368,6 +368,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
 </div>
 <div class="hm-tooltip" id="hmTooltip"></div>
 <div class="sync-bar" id="syncBar">
+  <button class="sync-btn" onclick="saveTodayAndPush()" style="background:#5a7a5a;color:#fff;font-weight:700;">💾 SAVE</button>
   <span class="sync-dot" id="syncDot"></span>
   <span class="sync-status" id="syncStatus">Cloud sync not configured</span>
   <button class="sync-btn" onclick="openSettings()">&#9881; Setup</button>
@@ -1894,6 +1895,7 @@ function showMain(tab){
     baselineEggs = (meals.bf && EGG_MEALS[meals.bf]) ? EGG_MEALS[meals.bf] : 0;
     eggsCtr = _d.eggs || 0; // Already loaded above, but make sure it's set
     renderMealOpts(); renderChecklist(); renderDrinksDisplay(); updateEggDisplay();
+    updateCalorieDisplay(); // Show correct calories on load
   }
 }
 
@@ -4018,6 +4020,13 @@ async function pullFromCloud(){
       updateSyncUI('err','Offline — using local data');
     }
   }
+}
+
+function saveTodayAndPush(){
+  saveTodayData();
+  setTimeout(() => pushToCloud(), 100);
+  const msg = document.getElementById('syncStatus');
+  if(msg) msg.textContent = '💾 Saving...';
 }
 
 async function forcSync(){
