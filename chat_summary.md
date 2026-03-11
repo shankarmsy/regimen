@@ -46,6 +46,16 @@ Schedule defaults: Mon/Wed/Fri = Workout, Tue/Thu = Run, Sat = Sat (workout+run)
 
 ## v1.20 Changes (Mar 10–11, 2026)
 
+### Sleep Log — Track Tab (Yesterday's Sleep)
+- **Hours slept:** Number input (0-12 hours, 0.25 increments)
+- **Sleep time:** Time input (HH:MM format) — e.g., 23:15 for 11:15pm
+- **Sleep score:** Number input (0-100 scale) — replaces quality buttons
+- All three fields required to save
+- Data saved: `{hrs, time, score, date}`
+- **Sleep Trend Chart:** Shows last 30 days with:
+  - Green bars = hours slept (target 7.5h baseline)
+  - Rust line with dots = sleep score trend (0-100)
+
 ### Water Tracking
 - **Units changed:** 300ml → 500ml per checklist item
 - **Auto-sync:** Checking "Water 500ml" items automatically adds 500ml to water counter
@@ -57,8 +67,9 @@ Schedule defaults: Mon/Wed/Fri = Workout, Tue/Thu = Run, Sat = Sat (workout+run)
   - Auto-populates from breakfast selection (Omelette→4, Bread+eggs(4)→4, Bread+eggs+avocado→3, Rice+eggs→3, Eggs only→5)
   - Deselecting breakfast resets to 0
   - Persists in storage under `eggs` key
-- **Habits chart:** Daily Egg Count (last 30 days)
-  - Bar chart showing daily egg totals from all logged meals
+- **Habits chart:** Daily Egg Count (last 30 days) — LINE CHART
+  - Trend line with dots showing daily egg totals from all logged meals
+  - Rust color (#c4440a), x-axis shows date labels every 5 days
   - Auto-calculated from meal data
 
 ### Sleep & Steps: Yesterday Tracking
@@ -68,11 +79,25 @@ Schedule defaults: Mon/Wed/Fri = Workout, Tue/Thu = Run, Sat = Sat (workout+run)
 - Labels updated: "Tonight's Sleep" → "Yesterday's Sleep", "Today's Steps" → "Yesterday's Steps"
 
 ### Badminton Sleep Auto-Adjust
-- **Sleep time display** in Track > Sleep log section
-- If badminton was done YESTERDAY (in plan OR checked as extra): **11:15pm** (rust color)
-- Otherwise: **10:15pm** (purple color)
-- Checks: (1) Is badminton in yesterday's day plan? (2) Was extra badminton checked yesterday?
-- Updates automatically when toggling badminton
+
+**Two places track sleep time:**
+
+1. **Checklist (Today tab)** — Shows TODAY's sleep time
+   - "Sleep — 7h 30min target" displays 11:15pm or 10:15pm
+   - If TODAY has badminton (plan OR extra checked): **11:15pm** (rust)
+   - Otherwise: **10:15pm** (purple)
+   - Updates when rendering checklist or toggling badminton
+
+2. **Sleep Log (Track tab)** — Shows YESTERDAY's sleep time
+   - Top of sleep log section shows bedtime reference
+   - If YESTERDAY had badminton (plan OR extra checked): **11:15pm** (rust)
+   - Otherwise: **10:15pm** (purple)
+   - Called when opening sleep log tab
+
+**Example:**
+- TODAY is Wednesday (workout day with badminton) → Checklist shows 11:15pm
+- YESTERDAY was Tuesday (run day, no badminton) → Sleep tab shows 10:15pm
+- Click "Badminton extra" on non-badminton day → Checklist updates to 11:15pm (sleep tab unaffected)
 
 ### Meals Updated
 - **Removed:** Bread+eggs (4), Avocado+nuts, Skipped

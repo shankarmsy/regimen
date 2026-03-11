@@ -687,16 +687,15 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;">
         <label style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Sleep time</label>
-        <div style="font-family:monospace;font-size:14px;font-weight:600;color:#4a3f7c;padding:5px 8px;background:var(--surface);border-radius:4px;min-width:80px;text-align:center;" id="sleepTimeDisplay">10:15pm</div>
+        <input id="sleepTimeInput" type="time" 
+          style="width:90px;font-family:monospace;font-size:14px;font-weight:600;border:1px solid var(--border);border-radius:5px;padding:5px 8px;background:var(--paper);color:var(--ink);text-align:center;"
+          placeholder="23:15">
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Quality</label>
-        <div style="display:flex;gap:6px;">
-          <button class="sleep-q-btn" onclick="setSleepQuality('poor',this)" style="padding:6px 10px;font-family:monospace;font-size:9px;text-transform:uppercase;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--muted);">Poor</button>
-          <button class="sleep-q-btn" onclick="setSleepQuality('ok',this)" style="padding:6px 10px;font-family:monospace;font-size:9px;text-transform:uppercase;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--muted);">OK</button>
-          <button class="sleep-q-btn" onclick="setSleepQuality('good',this)" style="padding:6px 10px;font-family:monospace;font-size:9px;text-transform:uppercase;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--muted);">Good</button>
-          <button class="sleep-q-btn" onclick="setSleepQuality('great',this)" style="padding:6px 10px;font-family:monospace;font-size:9px;text-transform:uppercase;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--muted);">Great</button>
-        </div>
+        <label style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Sleep score</label>
+        <input id="sleepScoreInput" type="number" min="0" max="100" step="1" placeholder="85"
+          style="width:90px;font-family:monospace;font-size:22px;font-weight:600;border:1px solid var(--border);border-radius:5px;padding:6px 10px;background:var(--paper);color:var(--ink);text-align:center;"
+          oninput="updateSleepPreview()">
       </div>
       <div id="sleepPreview" style="font-size:10px;color:var(--muted);align-self:flex-end;padding-bottom:8px;"></div>
     </div>
@@ -713,7 +712,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
   </div>
   <div class="chart-wrap">
     <div class="chart-title">Sleep Trend — Last 30 Days</div>
-    <div class="chart-sub">Target 7.5h shown as dashed line. Color = quality.</div>
+    <div class="chart-sub">Green bars = hours (target 7.5h). Rust line = sleep score (0-100).</div>
     <div id="sleepTrendChart"></div>
   </div>
   </div>
@@ -1327,20 +1326,25 @@ let _sleepQ='';
 function sleepDayKey(d){ return SLEEP_PFX+(d||yesterdayKey()); }
 function saveSleepLog(){
   const hrs=parseFloat(document.getElementById('sleepHrsInput').value);
+  const time=document.getElementById('sleepTimeInput').value; // HH:MM format
+  const score=parseInt(document.getElementById('sleepScoreInput').value);
+  
   if(isNaN(hrs)||hrs<=0){alert('Enter hours slept');return;}
-  const s=loadStore(); s[sleepDayKey()]={hrs,quality:_sleepQ||'ok',date:yesterdayKey()}; saveStore(s);
-  const m=document.getElementById('sleepSaveMsg'); m.textContent='✓ Saved';
+  if(!time){alert('Enter sleep time');return;}
+  if(isNaN(score)||score<0||score>100){alert('Enter sleep score (0-100)');return;}
+  
+  const s=loadStore(); 
+  s[sleepDayKey()]={hrs, time, score, date:yesterdayKey()}; 
+  saveStore(s);
+  
+  const m=document.getElementById('sleepSaveMsg'); 
+  m.textContent='✓ Saved';
   setTimeout(()=>m.textContent='',2500);
-  renderSleepStats(); renderSleepChart();
-}
-function setSleepQuality(q,btn){
-  _sleepQ=q;
-  document.querySelectorAll('.sleep-q-btn').forEach(b=>{b.style.background='var(--surface)';b.style.color='var(--muted)';b.style.borderColor='var(--border)';});
-  const c={poor:'var(--rust)',ok:'var(--gold,#c89b3c)',good:'var(--sage)',great:'#1d4e89'};
-  btn.style.background=c[q]; btn.style.color='#fff'; btn.style.borderColor=c[q];
+  renderSleepStats(); 
+  renderSleepChart();
 }
 function updateSleepTimeDisplay(){
-  // Sleep log is for YESTERDAY, so check yesterday's badminton
+  // Sleep log (Track tab) is for YESTERDAY, so check yesterday's badminton
   const store = loadStore();
   const yesterdayDate = yesterdayKey(); // Always yesterday for sleep log
   const yesterdayData = store[yesterdayDate] || {};
@@ -1363,14 +1367,18 @@ function updateSleepTimeDisplay(){
   }
   
   const display = document.getElementById('sleepTimeDisplay');
-  if(!display) return;
+  if(!display) {
+    console.warn('⚠ sleepTimeDisplay element not found');
+    return;
+  }
   
-  if(hasBadminton) {
-    display.textContent = '11:15pm';
-    display.style.color = '#c4440a';
-  } else {
-    display.textContent = '10:15pm';
-    display.style.color = '#4a3f7c';
+  const newTime = hasBadminton ? '11:15pm' : '10:15pm';
+  const newColor = hasBadminton ? '#c4440a' : '#4a3f7c';
+  
+  // Only update if changed
+  if(display.textContent !== newTime || display.style.color !== newColor) {
+    display.textContent = newTime;
+    display.style.color = newColor;
   }
 }
 
@@ -1386,13 +1394,23 @@ function updateSleepPreview(){
 }
 function loadSleepToday(){
   const d=loadStore()[sleepDayKey()];
-  const inp=document.getElementById('sleepHrsInput'); if(!inp) return;
-  if(d){inp.value=d.hrs;_sleepQ=d.quality||'ok';}else{inp.value='';_sleepQ='';}
-  updateSleepPreview();
-  setTimeout(()=>updateSleepTimeDisplay(), 50); // Ensure DOM is ready
-  if(_sleepQ){
-    document.querySelectorAll('.sleep-q-btn').forEach(b=>{if(b.textContent.trim().toLowerCase()===_sleepQ) setSleepQuality(_sleepQ,b);});
+  const hrsInp=document.getElementById('sleepHrsInput'); 
+  const timeInp=document.getElementById('sleepTimeInput');
+  const scoreInp=document.getElementById('sleepScoreInput');
+  if(!hrsInp) return;
+  
+  if(d){
+    hrsInp.value=d.hrs||'';
+    timeInp.value=d.time||'';
+    scoreInp.value=d.score||'';
+  }else{
+    hrsInp.value='';
+    timeInp.value='';
+    scoreInp.value='';
   }
+  
+  updateSleepPreview();
+  setTimeout(()=>updateSleepTimeDisplay(), 50);
 }
 function getLast30(pfx){
   const s=loadStore(), now=new Date(); now.setHours(0,0,0,0);
@@ -1414,22 +1432,74 @@ function renderSleepChart(){
   const el=document.getElementById('sleepTrendChart'); if(!el) return;
   const days=getLast30(SLEEP_PFX);
   if(!days.some(d=>d.data)){el.innerHTML='<div style="font-size:10px;color:var(--muted);text-align:center;padding:24px;font-style:italic;">Log your first night to see the trend</div>';return;}
+  
   const W=el.getBoundingClientRect().width||460,H=170,pad={t:20,r:16,b:36,l:34};
   const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b,xS=cW/(days.length-1||1);
-  const yS=v=>pad.t+cH-((Math.min(v,10))/10)*cH;
-  const qC={poor:'#c4440a',ok:'#c89b3c',good:'#8fba5a',great:'#1d4e89'};
+  
+  // Y-scale for hours (0-10h)
+  const yScaleHrs=v=>pad.t+cH-((Math.min(v,10))/10)*cH;
+  
+  // Y-scale for score (0-100)
+  const yScoreMax=100;
+  const yScaleScore=v=>pad.t+cH-((Math.min(v,yScoreMax))/yScoreMax)*cH;
+  
   let svg=`<svg width="${W}" height="${H}" style="overflow:visible">`;
-  [4,6,7.5,8,10].forEach(h=>{const y=yS(h),t=h===7.5;svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="${t?'#5a7a5a':'#d4c8b4'}" stroke-width="${t?1.5:.5}" stroke-dasharray="${t?'5,3':''}"/><text x="${pad.l-3}" y="${y+3}" text-anchor="end" font-size="8" fill="${t?'#5a7a5a':'#8a7a6a'}">${h}</text>`;});
-  const bw=Math.max(4,xS*.55);
+  
+  // Grid lines for hours (left axis)
+  [4,6,7.5,8,10].forEach(h=>{
+    const y=yScaleHrs(h);
+    const t=h===7.5;
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="${t?'#5a7a5a':'#d4c8b4'}" stroke-width="${t?1.5:.5}" stroke-dasharray="${t?'5,3':''}"/>`;
+    svg+=`<text x="${pad.l-3}" y="${y+3}" text-anchor="end" font-size="8" fill="${t?'#5a7a5a':'#8a7a6a'}">${h}</text>`;
+  });
+  
+  // Grid lines for score (right axis)
+  [0,25,50,75,100].forEach(s=>{
+    const y=yScaleScore(s);
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="#e8ddd4" stroke-width="0.5"/>`;
+  });
+  svg+=`<text x="${W-pad.r+8}" y="${yScaleScore(100)+3}" font-size="8" fill="#8a7a6a">100</text>`;
+  
+  // Hours bars
+  const bw=Math.max(4,xS*.35);
   days.forEach((d,i)=>{
     if(!d.data)return;
-    const x=pad.l+i*xS,y=yS(d.data.hrs),bh=yS(0)-y;
-    svg+=`<rect x="${(x-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${qC[d.data.quality]||'#c89b3c'}" rx="2" opacity=".75"><title>${d.date}: ${d.data.hrs}h (${d.data.quality})</title></rect>`;
+    const x=pad.l+i*xS;
+    const y=yScaleHrs(d.data.hrs);
+    const bh=yScaleHrs(0)-y;
+    svg+=`<rect x="${(x-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="#8fba5a" rx="2" opacity=".6"><title>${d.date}: ${d.data.hrs}h</title></rect>`;
   });
+  
+  // Score line with dots
+  const scorePoints=days.map((d,i)=>{
+    if(!d.data||d.data.score===undefined)return null;
+    return {x:pad.l+i*xS, y:yScaleScore(d.data.score), score:d.data.score, date:d.date};
+  }).filter(p=>p);
+  
+  if(scorePoints.length>0){
+    // Draw connecting line
+    for(let i=0;i<scorePoints.length-1;i++){
+      const p1=scorePoints[i], p2=scorePoints[i+1];
+      svg+=`<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="#c4440a" stroke-width="2" opacity="0.7"/>`;
+    }
+    // Draw dots
+    scorePoints.forEach(p=>{
+      svg+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="#c4440a" stroke="#fff" stroke-width="1">`;
+      svg+=`<title>${p.date}: ${p.score} score</title></circle>`;
+    });
+  }
+  
+  // X-axis labels
   days.forEach((d,i)=>{if(i%5===0||i===days.length-1){const x=pad.l+i*xS;svg+=`<text x="${x}" y="${H-pad.b+14}" text-anchor="middle" font-size="8" fill="#8a7a6a">${d.date.slice(5).replace('-','/')}</text>`;}});
+  
   svg+='</svg>';
-  const leg=Object.entries(qC).map(([q,c])=>`<div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:${c}"></div>${q}</div>`).join('');
-  el.innerHTML=`<div style="overflow-x:auto">${svg}</div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">${leg}</div>`;
+  
+  const leg=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:9px;color:var(--muted)">
+    <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:#8fba5a;opacity:.6"></div>Hours (target 7.5h)</div>
+    <div style="display:flex;align-items:center;gap:4px"><div style="width:2px;height:8px;background:#c4440a;margin:0 4px"></div>Sleep score (0-100)</div>
+  </div>`;
+  
+  el.innerHTML=`<div style="overflow-x:auto">${svg}</div>${leg}`;
 }
 
 // ── SHOWER ─────────────────────────────────────────────────────
@@ -2006,7 +2076,7 @@ function renderMealCharts(){
     }
     d.setDate(d.getDate()+1);
   }
-  renderWeeklyBar('eggChart', dailyEggs, 'eggs', '#c4440a');
+  renderDailyEggsChart('eggChart', dailyEggs);
   renderWeeklyBar('cavaChart', weeklyCava, 'times', '#1d4e89');
   renderMacroSplit('macroSplitChart', macroSplit);
   renderMacroTrend('macroTrendChart');
@@ -2158,6 +2228,66 @@ function renderBarChart(elId, data, unit){
     const color = MEAL_COLORS[label] || '#8a7a6a';
     return '<div class="bar-row"><div class="bar-label">'+label+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+color+'"><span class="bar-val">'+val+' '+unit+'</span></div></div></div>';
   }).join('')+'</div>';
+}
+
+function renderDailyEggsChart(elId, data){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const entries = Object.entries(data).sort((a,b)=>a[0].localeCompare(b[0])); // Sort by date
+  if(!entries.length){ el.innerHTML = '<div class="no-data">No data yet</div>'; return; }
+  
+  const max = Math.max(...entries.map(e=>e[1]));
+  const W = Math.max(el.offsetWidth||400, 400);
+  const H = 180;
+  const padL = 50, padR = 20, padTop = 15, padBot = 40;
+  const plotW = W - padL - padR;
+  const plotH = H - padTop - padBot;
+  const xStep = entries.length > 1 ? plotW / (entries.length - 1) : plotW / 2;
+  
+  let html = '<svg width="'+W+'" height="'+H+'" style="font-family:monospace;overflow:visible;">';
+  
+  // Y-axis grid lines
+  for(let i = 0; i <= 5; i++) {
+    const y = padTop + (plotH * (1 - i/5));
+    const val = Math.round((max / 5) * i);
+    html += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="#e8e0d4" stroke-width="0.5"/>';
+    html += '<text x="'+(padL-8)+'" y="'+(y+3)+'" text-anchor="end" font-size="9" fill="#8a7a6a">'+val+'</text>';
+  }
+  
+  // X-axis
+  html += '<line x1="'+padL+'" y1="'+(padTop+plotH)+'" x2="'+(W-padR)+'" y2="'+(padTop+plotH)+'" stroke="#c8c0a8" stroke-width="1.5"/>';
+  
+  // Plot line and dots
+  const points = entries.map(([label, val], i) => {
+    const x = padL + i * xStep;
+    const y = padTop + plotH * (1 - val / max);
+    return { x, y, label, val };
+  });
+  
+  // Draw connecting line
+  if(points.length > 1) {
+    for(let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i], p2 = points[i+1];
+      html += '<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+p2.x+'" y2="'+p2.y+'" stroke="#c4440a" stroke-width="2" opacity="0.7"/>';
+    }
+  }
+  
+  // Draw dots
+  points.forEach(p => {
+    html += '<circle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="#c4440a" stroke="#fff" stroke-width="1.5">';
+    html += '<title>'+p.label+': '+p.val+' eggs</title></circle>';
+  });
+  
+  // X-axis labels (show every 5th day or if <= 10 days)
+  points.forEach((p, i) => {
+    if(entries.length <= 10 || i % 5 === 0 || i === entries.length - 1) {
+      const [y, m, d] = p.label.split('-');
+      html += '<text x="'+p.x+'" y="'+(padTop+plotH+25)+'" text-anchor="middle" font-size="8" fill="#8a7a6a">'+m+'/'+d+'</text>';
+    }
+  });
+  
+  html += '</svg>';
+  el.innerHTML = html;
 }
 
 function renderWeeklyBar(elId, data, unit, color){
@@ -2506,6 +2636,7 @@ function renderChecklist(){
   }
 
   updateProgress();
+  updateChecklistSleepTime();
   updateSleepTimeDisplay();
 }
 
@@ -2515,6 +2646,7 @@ function toggleExtra(key){
   renderChecklist();
   // Update sleep time if badminton was toggled
   if(key === 'extra-badminton') {
+    updateChecklistSleepTime();
     updateSleepTimeDisplay();
   }
 }
@@ -2588,6 +2720,41 @@ function saveTodayData(){
   saveStore(store);
   buildDateBar(); // refresh has-data indicators
   renderHeatmap();
+}
+
+function updateChecklistSleepTime(){
+  // Checklist shows TODAY's sleep time (for tonight)
+  const dayType = currentType;
+  const dayPlan = DAYS[dayType] || {};
+  
+  let hasBadminton = false;
+  
+  // Check 1: Is badminton in today's plan?
+  if(dayPlan) {
+    const allItems = Object.values(dayPlan).flat();
+    if(allItems.some(it => /\bbadminton\b/i.test(it.text))) {
+      hasBadminton = true;
+    }
+  }
+  
+  // Check 2: Was extra badminton checked today?
+  if(!hasBadminton && checked['extra-badminton']) {
+    hasBadminton = true;
+  }
+  
+  const newTime = hasBadminton ? '11:15pm' : '10:15pm';
+  const newColor = hasBadminton ? '#c4440a' : '#4a3f7c';
+  
+  // Find all checklist items with sleep text and update their time
+  document.querySelectorAll('.ci-text').forEach(el => {
+    if(el.textContent.includes('Sleep')) {
+      const timeSpan = el.parentElement.querySelector('.ci-time');
+      if(timeSpan && (timeSpan.textContent !== newTime || timeSpan.style.color !== newColor)) {
+        timeSpan.textContent = newTime;
+        timeSpan.style.color = newColor;
+      }
+    }
+  });
 }
 
 function updateProgress(){
