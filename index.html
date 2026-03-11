@@ -523,6 +523,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
 <div id="mainpanel-track" class="mainpanel">
   <div class="subnav">
     <button class="subnav-btn active" id="tracktab-body"    onclick="showTrack('body')">&#128170; Body</button>
+    <button class="subnav-btn"        id="tracktab-weight"  onclick="showTrack('weight')">⚖️ Weight</button>
     <button class="subnav-btn"        id="tracktab-habits"  onclick="showTrack('habits')">&#128293; Habits</button>
     <button class="subnav-btn"        id="tracktab-sleep"   onclick="showTrack('sleep')">&#128564; Sleep</button>
     <button class="subnav-btn"        id="tracktab-shower"  onclick="showTrack('shower')">&#x1F6BF; Shower</button>
@@ -545,11 +546,6 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
   </div>
 
   <div class="body-grid">
-    <div class="body-input-card">
-      <label class="body-input-label">Weight (lbs)</label>
-      <input class="body-input-field" id="b_weight" type="number" step="0.1" placeholder="e.g. 174.0">
-      <div class="body-delta" id="d_weight"></div>
-    </div>
     <div class="body-input-card">
       <label class="body-input-label">Chest (in)</label>
       <input class="body-input-field" id="b_chest" type="number" step="0.25" placeholder="inches">
@@ -605,6 +601,41 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
       <div class="week-tab" onclick="setMetric('thighs',this)">Thighs</div>
     </div>
     <div id="metricChart"></div>
+  </div>
+  </div>
+</div>
+<div class="subpanel" id="trackpanel-weight">
+  <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px;">
+    <button id="weightTab-log" onclick="showSubTab('weight','log')" style="flex:1;padding:10px 8px;font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:none;border:none;border-bottom:3px solid var(--rust);margin-bottom:-2px;cursor:pointer;color:var(--rust);">&#9998; Log</button>
+    <button id="weightTab-progress" onclick="showSubTab('weight','progress')" style="flex:1;padding:10px 8px;font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;color:var(--muted);">&#128200; Progress</button>
+  </div>
+  <div id="weightSub-log">
+<div class="sec-title">Daily Weight</div>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:18px;">Log weight in lbs. Target: track trend over time.</p>
+  <div class="progress-card" style="margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <label style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Weight (lbs)</label>
+        <input id="weightInput" type="number" min="0" max="500" step="0.1" placeholder="185.5"
+          style="width:120px;font-family:monospace;font-size:22px;font-weight:600;border:1px solid var(--border);border-radius:5px;padding:6px 10px;background:var(--paper);color:var(--ink);text-align:center;">
+      </div>
+      <div id="weightPreview" style="font-size:10px;color:var(--muted);align-self:flex-end;padding-bottom:8px;"></div>
+    </div>
+    <button onclick="saveWeight()" style="background:var(--ink);color:var(--paper);border:none;padding:9px 24px;font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;border-radius:4px;cursor:pointer;">Save Weight</button>
+    <span id="weightSaveMsg" style="font-size:10px;color:var(--sage);margin-left:12px;"></span>
+  </div>
+  </div>
+  <div id="weightSub-progress" style="display:none;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:20px;">
+    <div class="hm-stat"><div class="hm-stat-val" id="wCurrent">—</div><div class="hm-stat-label">Current</div></div>
+    <div class="hm-stat"><div class="hm-stat-val" id="wLowest">—</div><div class="hm-stat-label">Lowest</div></div>
+    <div class="hm-stat"><div class="hm-stat-val" id="wHighest">—</div><div class="hm-stat-label">Highest</div></div>
+    <div class="hm-stat"><div class="hm-stat-val" id="wLogged">0</div><div class="hm-stat-label">Days logged</div></div>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title">Weight Trend — Last 30 Days</div>
+    <div class="chart-sub">Daily weight in lbs. Track your progress over time.</div>
+    <div id="weightTrendChart"></div>
   </div>
   </div>
 </div>
@@ -1044,16 +1075,14 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
 <div class="tl-item"><div class="tl-time">5:45am</div><div class="tl-dot" style="background:var(--blue)"></div><div class="tl-content tl-water"><strong>Wake · Warm lemon + salt water 500ml 1 tsp</strong><small>Warm water · fresh lemon squeeze · pinch of salt · rehydrates liver + aids digestion</small></div></div>
 <div class="tl-item"><div class="tl-time">5:50am</div><div class="tl-dot" style="background:var(--gold)"></div><div class="tl-content tl-move"><strong>10 min sunlight · no sunglasses</strong><small>Sets cortisol + testosterone rhythm for the day</small></div></div>
 <div class="tl-item"><div class="tl-time">6:00am</div><div class="tl-dot" style="background:var(--rust)"></div><div class="tl-content tl-move"><strong>Workout 45 min — 2Bros plan</strong><small>Mon=Legs · Wed=Push · Fri=Pull</small></div></div>
-<div class="tl-item"><div class="tl-time">6:45am</div><div class="tl-dot" style="background:var(--muted)"></div><div class="tl-blocked">6:45–8:00am blocked — nothing scheduled here</div></div>
 <div class="tl-item"><div class="tl-time">8:00am</div><div class="tl-dot" style="background:#7c3f00"></div><div class="tl-content tl-coffee"><strong>Ryze Mushroom Coffee</strong><small>First thing when block lifts · no sugar · cortisol has peaked</small></div></div>
 <div class="tl-item"><div class="tl-time">8:15am</div><div class="tl-dot" style="background:var(--sage)"></div><div class="tl-content tl-good"><strong>Breakfast — eating window opens</strong><small>Rotate daily · protein first always · cold shower before if time allows</small></div></div>
-<div class="tl-item"><div class="tl-time">9:30am</div><div class="tl-dot" style="background:#7c3f00"></div><div class="tl-content tl-coffee"><strong>Black Coffee #1</strong><small>Fresh ground · no sugar ever</small></div></div>
 <div class="tl-item"><div class="tl-time">10:30am</div><div class="tl-dot" style="background:var(--blue)"></div><div class="tl-content tl-water"><strong>300ml water</strong></div></div>
 <div class="tl-item"><div class="tl-time">12:00pm</div><div class="tl-dot" style="background:var(--blue)"></div><div class="tl-content tl-water"><strong>300ml water</strong></div></div>
 <div class="tl-item"><div class="tl-time">12:30pm</div><div class="tl-dot" style="background:var(--sage)"></div><div class="tl-content tl-good"><strong>Lunch</strong><small>Dal+rice / Chicken / Rajma / CAVA · protein before rice · papad for crunch</small></div></div>
-<div class="tl-item"><div class="tl-time">1:00pm</div><div class="tl-dot" style="background:#7c3f00"></div><div class="tl-content tl-coffee"><strong>Black Coffee #2 — LAST CAFFEINE</strong><small>Hard 1pm cutoff on workout days · gives 8–9hrs to clear before sleep</small></div></div>
+<div class="tl-item"><div class="tl-time">1:00pm</div><div class="tl-dot" style="background:#7c3f00"></div><div class="tl-content tl-coffee"><strong>Black Coffee</strong><small>Hard 1pm cutoff · gives 8–9hrs to clear before sleep</small></div></div>
 <div class="tl-item"><div class="tl-time">3:00pm</div><div class="tl-dot" style="background:var(--blue)"></div><div class="tl-content tl-water"><strong>300ml water</strong></div></div>
-<div class="tl-item"><div class="tl-time">3:30pm</div><div class="tl-dot" style="background:var(--sage)"></div><div class="tl-content tl-good"><strong>Snack — Whey every day</strong><small>Chicken day=1sc+A2milk · No-chicken=2sc+water · CAVA=1sc+water · +nuts always</small></div></div>
+<div class="tl-item"><div class="tl-time">3:30pm</div><div class="tl-dot" style="background:#7c3f00"></div><div class="tl-content tl-coffee"><strong>Tea</strong><small>Last caffeine of the day · herbal or green</small></div></div>
 <div class="tl-item"><div class="tl-time">5:00pm</div><div class="tl-dot" style="background:var(--blue)"></div><div class="tl-content tl-water"><strong>300ml water</strong></div></div>
 <div class="tl-item"><div class="tl-time">5:30pm</div><div class="tl-dot" style="background:var(--sage)"></div><div class="tl-content tl-good"><strong>Dinner + Metformin + Fish oil</strong><small>Always lighter than lunch · meds with food</small></div></div>
 <div class="tl-item"><div class="tl-time">6:00pm</div><div class="tl-dot" style="background:var(--rust)"></div><div class="tl-content tl-warn"><strong>EATING WINDOW CLOSES — zero food after this</strong></div></div>
@@ -1156,9 +1185,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
 <div class="sec-title">Coffee &amp; Tea</div>
 <div class="meal-grid">
 <div class="mc"><div class="mc-head"><span class="mc-name">Ryze Coffee</span><span class="mc-time">8:00am daily</span></div><div class="mc-body"><div class="ing"><span class="ing-n">First thing when 6:45–8am block lifts</span></div><div class="ing"><span class="ing-n">No sugar ever</span><span class="ing-a">black only</span></div><div class="ing"><span class="ing-n">Liver-safe</span><span class="ing-a">fine to continue</span></div></div></div>
-<div class="mc"><div class="mc-head"><span class="mc-name">Black Coffee #1</span><span class="mc-time">9:30am</span></div><div class="mc-body"><div class="ing"><span class="ing-n">Fresh ground</span><span class="ing-a">use your machine</span></div><div class="ing"><span class="ing-n">No sugar, no milk</span><span class="ing-a">black only</span></div><div class="ing"><span class="ing-n">Swap</span><span class="ing-a">black or green tea</span></div></div></div>
-<div class="mc"><div class="mc-head"><span class="mc-name">Black Coffee #2 — Last</span><span class="mc-time">1:00pm cutoff</span></div><div class="mc-body"><div class="ing"><span class="ing-n">Hard 1pm cutoff</span><span class="ing-a">non-negotiable</span></div><div class="ing"><span class="ing-n">Clears by 7–8pm</span><span class="ing-a">protects sleep</span></div></div></div>
-<div class="mc"><div class="mc-head"><span class="mc-name">Optional Tea</span><span class="mc-time">3:30pm max</span></div><div class="mc-body"><div class="ing"><span class="ing-n">Green tea</span><span class="ing-a">EGCG liver-protective</span></div><div class="ing"><span class="ing-n">No sugar ever</span><span class="ing-a">absolute rule</span></div></div></div>
+<div class="mc"><div class="mc-head"><span class="mc-name">Black Coffee</span><span class="mc-time">1:00pm cutoff</span></div><div class="mc-body"><div class="ing"><span class="ing-n">Hard 1pm cutoff</span><span class="ing-a">non-negotiable</span></div><div class="ing"><span class="ing-n">Clears by 7–8pm</span><span class="ing-a">protects sleep</span></div></div></div>
+<div class="mc"><div class="mc-head"><span class="mc-name">Tea</span><span class="mc-time">3:30pm · last caffeine</span></div><div class="mc-body"><div class="ing"><span class="ing-n">Green or herbal</span><span class="ing-a">no sugar</span></div><div class="ing"><span class="ing-n">Last caffeine window</span><span class="ing-a">clears by 11pm</span></div></div></div>
 </div>
 
 </div>
@@ -1320,6 +1348,98 @@ function moveMealTip(e){
   tip.style.left=x+'px'; tip.style.top=y+'px';
 }
 
+// ── WEIGHT ─────────────────────────────────────────────────────
+const WEIGHT_PFX='weight_';
+function weightKey(d){return WEIGHT_PFX+(d||todayKey());}
+function saveWeight(){
+  const weight=parseFloat(document.getElementById('weightInput').value);
+  if(isNaN(weight)||weight<=0){alert('Enter your weight');return;}
+  const s=loadStore(); 
+  s[weightKey()]={weight, date:todayKey()}; 
+  saveStore(s);
+  const m=document.getElementById('weightSaveMsg'); 
+  m.textContent='✓ Saved';
+  setTimeout(()=>m.textContent='',2500);
+  renderWeightStats();
+  renderWeightChart();
+}
+function loadWeightToday(){
+  const d=loadStore()[weightKey()];
+  const inp=document.getElementById('weightInput'); 
+  if(!inp) return;
+  if(d){
+    inp.value=d.weight||'';
+  }else{
+    inp.value='';
+  }
+}
+function renderWeightStats(){
+  const days=getLast30(WEIGHT_PFX).filter(d=>d.data);
+  const n=days.length;
+  document.getElementById('wLogged').textContent=n;
+  if(!n){
+    document.getElementById('wCurrent').textContent='—';
+    document.getElementById('wLowest').textContent='—';
+    document.getElementById('wHighest').textContent='—';
+    return;
+  }
+  const weights=days.map(d=>d.data.weight);
+  const current=weights[weights.length-1];
+  const lowest=Math.min(...weights);
+  const highest=Math.max(...weights);
+  document.getElementById('wCurrent').textContent=current.toFixed(1)+'lb';
+  document.getElementById('wLowest').textContent=lowest.toFixed(1)+'lb';
+  document.getElementById('wHighest').textContent=highest.toFixed(1)+'lb';
+}
+function renderWeightChart(){
+  const el=document.getElementById('weightTrendChart'); if(!el) return;
+  const days=getLast30(WEIGHT_PFX);
+  if(!days.some(d=>d.data)){el.innerHTML='<div style="font-size:10px;color:var(--muted);text-align:center;padding:24px;font-style:italic;">Log your weight to see the trend</div>';return;}
+  
+  const W=el.getBoundingClientRect().width||460,H=170,pad={t:20,r:16,b:36,l:34};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b,xS=cW/(days.length-1||1);
+  
+  const points=days.map((d,i)=>{
+    if(!d.data||!d.data.weight) return null;
+    return {x:pad.l+i*xS, weight:d.data.weight, date:d.date};
+  }).filter(p=>p);
+  
+  if(!points.length){el.innerHTML='<div style="font-size:10px;color:var(--muted);text-align:center;padding:24px;">Log weight to see chart</div>';return;}
+  
+  const minW=Math.min(...points.map(p=>p.weight));
+  const maxW=Math.max(...points.map(p=>p.weight));
+  const range=Math.max(1, maxW-minW);
+  const yScale=w=>pad.t+cH-(((w-minW)/range)*cH);
+  
+  let svg=`<svg width="${W}" height="${H}" style="overflow:visible">`;
+  
+  // Grid lines
+  [minW, (minW+maxW)/2, maxW].forEach(w=>{
+    const y=yScale(w);
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="#d4c8b4" stroke-width="0.5"/>`;
+    svg+=`<text x="${pad.l-3}" y="${y+3}" text-anchor="end" font-size="8" fill="#8a7a6a">${w.toFixed(1)}</text>`;
+  });
+  
+  // Draw connecting line
+  for(let i=0;i<points.length-1;i++){
+    const p1=points[i], p2=points[i+1];
+    svg+=`<line x1="${p1.x.toFixed(1)}" y1="${yScale(p1.weight).toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${yScale(p2.weight).toFixed(1)}" stroke="#8fba5a" stroke-width="2" opacity="0.7"/>`;
+  }
+  
+  // Draw dots
+  points.forEach(p=>{
+    const y=yScale(p.weight);
+    svg+=`<circle cx="${p.x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#8fba5a" stroke="#fff" stroke-width="1">`;
+    svg+=`<title>${p.date}: ${p.weight.toFixed(1)}lb</title></circle>`;
+  });
+  
+  // X-axis labels
+  points.forEach((p,i)=>{if(i%5===0||i===points.length-1){svg+=`<text x="${p.x}" y="${H-pad.b+14}" text-anchor="middle" font-size="8" fill="#8a7a6a">${p.date.slice(5).replace('-','/')}</text>`;}});
+  
+  svg+='</svg>';
+  el.innerHTML=`<div style="overflow-x:auto">${svg}</div>`;
+}
+
 // ── SLEEP ──────────────────────────────────────────────────────
 const SLEEP_PFX='sleep_';
 let _sleepQ='';
@@ -1367,10 +1487,7 @@ function updateSleepTimeDisplay(){
   }
   
   const display = document.getElementById('sleepTimeDisplay');
-  if(!display) {
-    console.warn('⚠ sleepTimeDisplay element not found');
-    return;
-  }
+  if(!display) return; // Only warn if called from Track tab context
   
   const newTime = hasBadminton ? '11:15pm' : '10:15pm';
   const newColor = hasBadminton ? '#c4440a' : '#4a3f7c';
@@ -1730,12 +1847,14 @@ function showSubTab(prefix, tab) {
   });
   if (tab === 'progress') {
     if (prefix === 'body')   { renderBodyCharts(); renderBodyDeltas(); }
+    if (prefix === 'weight') { renderWeightStats(); renderWeightChart(); }
     if (prefix === 'sleep')  { renderSleepStats(); renderSleepChart(); }
     if (prefix === 'shower') { renderShowerStats(); renderShowerChart(); }
     if (prefix === 'steps')  { renderStepsStats(); renderStepsChart(); }
     if (prefix === 'runs')   { renderRunStats(); renderRunCharts(); }
   }
   if (tab === 'log') {
+    if (prefix === 'weight') loadWeightToday();
     if (prefix === 'sleep')  loadSleepToday();
     if (prefix === 'shower') loadShowerToday();
     if (prefix === 'steps')  loadStepsToday();
@@ -2408,17 +2527,16 @@ const DAYS = {
       {t:"5:45am",text:"Soak chia: 1 tbsp dry + small bowl of water → fridge (ready by 3:30pm)",tag:"tag-food"},
       {t:"5:50am",text:"10 min sunlight outside",tag:"tag-move"},
       {t:"6:00am",text:"Workout 45 min — 2Bros plan",tag:"tag-move"},
-      {t:"8:00am",text:"Ryze mushroom coffee — no sugar",tag:"tag-coffee"},
+      {t:"9:30am",text:"Ryze mushroom coffee — no sugar",tag:"tag-coffee"},
       {t:"8:15am",text:"Breakfast — psyllium 1 tsp in water, chug fast",tag:"tag-food"},
-      {t:"9:30am",text:"Black coffee #1 — no sugar",tag:"tag-coffee"},
     ],
     Afternoon:[
       {t:"10:30am",text:"Water 500ml",tag:"tag-water"},
       {t:"12:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"12:30pm",text:"Lunch — protein before rice · papad for crunch",tag:"tag-food"},
-      {t:"1:00pm",text:"Black coffee #2 — LAST caffeine of day",tag:"tag-coffee"},
+      {t:"1:00pm",text:"Black coffee — no sugar",tag:"tag-coffee"},
       {t:"3:00pm",text:"Water 500ml",tag:"tag-water"},
-      {t:"3:30pm",text:"Snack + whey (1sc A2 if chicken, 2sc water if not) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
+      {t:"3:30pm",text:"Tea — last caffeine of the day",tag:"tag-coffee"},
     ],
     Evening:[
       {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
@@ -2439,16 +2557,15 @@ const DAYS = {
       {t:"6:50am",text:"10 min sunlight outside",tag:"tag-move"},
       {t:"8:00am",text:"Ryze mushroom coffee — no sugar",tag:"tag-coffee"},
       {t:"8:15am",text:"Breakfast — psyllium 1 tsp in water, chug fast",tag:"tag-food"},
-      {t:"9:30am",text:"Black coffee #1 — no sugar",tag:"tag-coffee"},
     ],
     Afternoon:[
       {t:"10:30am",text:"Water 500ml",tag:"tag-water"},
       {t:"12:00pm",text:"Run 25–30 min",tag:"tag-move"},
       {t:"12:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"12:30pm",text:"Lunch — protein before rice",tag:"tag-food"},
-      {t:"1:00pm",text:"Black coffee #2 — LAST caffeine",tag:"tag-coffee"},
+      {t:"1:00pm",text:"Black coffee — no sugar",tag:"tag-coffee"},
       {t:"3:00pm",text:"Water 500ml",tag:"tag-water"},
-      {t:"3:30pm",text:"Snack + whey (2sc water) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
+      {t:"3:30pm",text:"Tea — last caffeine of the day",tag:"tag-coffee"},
     ],
     Evening:[
       {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
@@ -2501,9 +2618,9 @@ const DAYS = {
       {t:"11:15am",text:"Post-VB: whey + banana",tag:"tag-food"},
       {t:"12:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"1:00pm",text:"Lunch — CAVA or chicken+rice",tag:"tag-food"},
-      {t:"1:00pm",text:"Black coffee #1 — LAST caffeine",tag:"tag-coffee"},
+      {t:"1:00pm",text:"Black coffee — no sugar",tag:"tag-coffee"},
       {t:"3:00pm",text:"Water 500ml",tag:"tag-water"},
-      {t:"3:30pm",text:"Snack + whey (1sc A2 or water) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
+      {t:"3:30pm",text:"Tea — last caffeine of the day",tag:"tag-coffee"},
     ],
     Evening:[
       {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
@@ -2524,15 +2641,14 @@ const DAYS = {
       {t:"6:55am",text:"10 min sunlight outside",tag:"tag-move"},
       {t:"8:00am",text:"Ryze mushroom coffee",tag:"tag-coffee"},
       {t:"8:15am",text:"Breakfast — psyllium 1 tsp in water, chug fast · NO banana",tag:"tag-food"},
-      {t:"9:30am",text:"Black coffee #1",tag:"tag-coffee"},
     ],
     Afternoon:[
       {t:"10:30am",text:"Water 500ml",tag:"tag-water"},
       {t:"12:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"12:30pm",text:"Lunch — protein before rice",tag:"tag-food"},
-      {t:"1:00pm",text:"Black coffee #2 — LAST caffeine",tag:"tag-coffee"},
+      {t:"1:00pm",text:"Black coffee — no sugar",tag:"tag-coffee"},
       {t:"3:00pm",text:"Water 500ml",tag:"tag-water"},
-      {t:"3:30pm",text:"Snack + whey (2sc water) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
+      {t:"3:30pm",text:"Tea — last caffeine of the day",tag:"tag-coffee"},
     ],
     Evening:[
       {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
@@ -2670,6 +2786,17 @@ function toggleItem(group,i){
     updateWaterDisplay();
   }
   
+  // If coffee, mushroom, or tea item: increment drinks counter
+  if (item && item.text) {
+    if (/\bcoffee\b/i.test(item.text)) {
+      changeDrink('coffee', checked[key] ? 1 : -1);
+    } else if (/\bmushroom\b/i.test(item.text)) {
+      changeDrink('mushroom', checked[key] ? 1 : -1);
+    } else if (/\btea\b/i.test(item.text)) {
+      changeDrink('tea', checked[key] ? 1 : -1);
+    }
+  }
+  
   saveTodayData();
   renderChecklist();
 }
@@ -2711,7 +2838,7 @@ function saveTodayData(){
   Object.entries(data).forEach(([group,items])=>{
     items.forEach((_,i)=>{ total++; if(checked[group+'-'+i]) done++; });
   });
-  // Preserve meals and drinks data already on this key
+  // Preserve meals data already on this key
   const meals = store[key].meals;
   const eggs = store[key].eggs;
   store[key] = { type:currentType, checked:{...checked}, water:waterMl, eggs:eggsCtr, total, done, score: total>0?Math.round(done/total*100):0 };
@@ -3448,8 +3575,8 @@ let _ghFileSha    = null; // current SHA of data.json — required for updates
 })();
 
 // ── BODY MEASUREMENTS ──
-const BODY_FIELDS = ['weight','chest','arms','waist','tummy','hips','thighs'];
-const BODY_LABELS = {weight:'lbs',chest:'in',arms:'in',waist:'in',tummy:'in',hips:'in',thighs:'in'};
+const BODY_FIELDS = ['chest','arms','waist','tummy','hips','thighs'];
+const BODY_LABELS = {chest:'in',arms:'in',waist:'in',tummy:'in',hips:'in',thighs:'in'};
 let currentMetric = 'waist';
 
 function getSundayKey(d){

@@ -27,7 +27,7 @@ git push --force
 
 ### App Structure
 - **Today tab** — main daily logging view with date bar (Today first, 7 pills descending left→right), day type toggle, checklist, meals, drinks/water
-- **Track tab** — body measurements, sleep, shower, steps charts
+- **Track tab** — Body, Weight (NEW), Habits (heatmap + charts), Sleep, Shower, Steps, Runs
 - **Plan tab** — meal plan schedule, meal cards, rules
 
 ### Day Type Logic
@@ -45,6 +45,13 @@ Schedule defaults: Mon/Wed/Fri = Workout, Tue/Thu = Run, Sat = Sat (workout+run)
 ---
 
 ## v1.20 Changes (Mar 10–11, 2026)
+
+### Weight Tracking — NEW Tab
+- **Daily weight logging:** Number input (0-500 lbs, 0.1 increments)
+- Separate "Weight" tab in Track section with Log & Progress subtabs
+- **Log tab:** Enter daily weight
+- **Progress tab:** Line chart showing last 30 days + stats (current, lowest, highest, days logged)
+- Data stored by date, syncs to GitHub
 
 ### Sleep Log — Track Tab (Yesterday's Sleep)
 - **Hours slept:** Number input (0-12 hours, 0.25 increments)
