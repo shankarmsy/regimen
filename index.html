@@ -1888,11 +1888,12 @@ function showMain(tab){
       b.classList.toggle('active', t === currentType);
     });
     buildDateBar();
-    renderMealOpts(); renderChecklist(); renderDrinksDisplay(); updateEggDisplay();
-    // Recalculate baselineEggs from current breakfast selection
+    // Restore eggs and baselineEggs BEFORE rendering (so renderMealOpts doesn't reset them)
     const store = loadStore();
     const meals = (store[activeEditKey] && store[activeEditKey].meals) || {};
     baselineEggs = (meals.bf && EGG_MEALS[meals.bf]) ? EGG_MEALS[meals.bf] : 0;
+    eggsCtr = _d.eggs || 0; // Already loaded above, but make sure it's set
+    renderMealOpts(); renderChecklist(); renderDrinksDisplay(); updateEggDisplay();
   }
 }
 
@@ -2099,6 +2100,7 @@ function renderMealOpts() {
           eggsCtr = eggCount;
           baselineEggs = eggCount;
           updateEggDisplay();
+          saveTodayData(); // Persist eggs to storage
         }
       }
 
