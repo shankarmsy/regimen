@@ -1889,6 +1889,10 @@ function showMain(tab){
     });
     buildDateBar();
     renderMealOpts(); renderChecklist(); renderDrinksDisplay(); updateEggDisplay();
+    // Recalculate baselineEggs from current breakfast selection
+    const store = loadStore();
+    const meals = (store[activeEditKey] && store[activeEditKey].meals) || {};
+    baselineEggs = (meals.bf && EGG_MEALS[meals.bf]) ? EGG_MEALS[meals.bf] : 0;
   }
 }
 
@@ -2089,14 +2093,11 @@ function renderMealOpts() {
         renderMealCharts();
         updateCalorieDisplay();
         
-        // Auto-populate eggs counter for breakfast meals
-        if (slot === 'bf' && nowSelected) {
-          const eggCount = EGG_MEALS[opt] || 0;
+        // Auto-populate eggs counter for breakfast meals (only on user click, not during render)
+        if (slot === 'bf') {
+          const eggCount = EGG_MEALS[nowSelected ? opt : null] || 0;
           eggsCtr = eggCount;
-          updateEggDisplay();
-        } else if (slot === 'bf' && !nowSelected) {
-          // Deselected breakfast - reset egg counter
-          eggsCtr = 0;
+          baselineEggs = eggCount;
           updateEggDisplay();
         }
       }
@@ -2743,6 +2744,7 @@ let currentType = defaultTypeForDate(todayKey());
 let checked = {};
 let waterMl = 0;
 let eggsCtr = 0;
+let baselineEggs = 0; // eggs already included in selected breakfast
 
 function setDayType(type, btn){
   const key = activeEditKey;
@@ -2972,11 +2974,12 @@ function updateCalorieDisplay(){
     }
   });
   
-  // Add calories from manual eggs counter (70 cal per egg)
-  if(eggsCtr > 0) {
-    totalCal += eggsCtr * 70;
-    totalP += eggsCtr * 6;  // ~6g protein per egg
-    totalF += eggsCtr * 5;  // ~5g fat per egg
+  // Add calories from EXTRA eggs (beyond what's in the meal)
+  const extraEggs = Math.max(0, eggsCtr - baselineEggs);
+  if(extraEggs > 0) {
+    totalCal += extraEggs * 70;
+    totalP += extraEggs * 6;  // ~6g protein per egg
+    totalF += extraEggs * 5;  // ~5g fat per egg
   }
   
   const proteinEl = document.getElementById('proteinAmount');
@@ -3006,7 +3009,7 @@ function updateProgress(){
 }
 
 function resetAll(){
-  checked={};waterMl=0;eggsCtr=0;
+  checked={};waterMl=0;eggsCtr=0;baselineEggs=0;
   saveTodayData();
   renderChecklist();
 }
@@ -4274,6 +4277,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Clean all data before today — but only on v1.20 upgrade
   const store = loadStore();
   const today = todayKey();
+  
+  // Initialize lastSyncedHash from current store state
+  lastSyncedHash = JSON.stringify(store);
   
   // Only clean pre-today data on first v1.20 load
   if (!store._v120_cleaned) {
