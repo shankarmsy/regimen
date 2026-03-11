@@ -1264,25 +1264,25 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
 <script>
 // ── MEAL THUMBNAIL DATA ────────────────────────────────────────
 const MEAL_INFO = {
-  'Omelette/bhurji/scrambled': {
+  'Omelette (4 eggs)': {
     emoji:'🍳', color:'#7c3f00',
-    ingredients:[['Eggs','3–4'],['Onion, chilli','½ cup'],['Turmeric, salt','pinch'],['Oil / ghee','½ tsp'],['+ bread (2 slices) OR ½ avocado','optional']],
-    macros:{P:'24g',C:'8g',F:'16g',Cal:'~270'}
+    ingredients:[['Eggs','4'],['Onion, chilli','½ cup'],['Turmeric, salt','pinch'],['Oil / ghee','½ tsp']],
+    macros:{P:'28g',C:'8g',F:'18g',Cal:'~310'}
   },
   'Power oatmeal': {
     emoji:'🥣', color:'#5a7a5a',
     ingredients:[['Rolled oats','½ cup'],['Banana','½'],['Whey protein','1 scoop'],['Almond butter','1 tbsp']],
     macros:{P:'28g',C:'42g',F:'8g',Cal:'~360'}
   },
-  'Bread+eggs (2)': {
+  'Bread+2 eggs+½ avocado': {
     emoji:'🍞', color:'#8a7a6a',
     ingredients:[['Whole wheat bread','2 slices'],['Eggs','2'],['Avocado','½'],['Butter','½ tsp']],
     macros:{P:'18g',C:'30g',F:'18g',Cal:'~350'}
   },
-  'Bread+eggs+avocado': {
+  'Bread+4 eggs+½ avocado': {
     emoji:'🥑', color:'#3a6a3a',
-    ingredients:[['Whole wheat bread','2 slices'],['Eggs','3'],['Avocado','½'],['Salt, lemon','to taste']],
-    macros:{P:'22g',C:'30g',F:'22g',Cal:'~400'}
+    ingredients:[['Whole wheat bread','2 slices'],['Eggs','4'],['Avocado','½'],['Salt, lemon','to taste']],
+    macros:{P:'30g',C:'30g',F:'24g',Cal:'~450'}
   },
   'Chicken+rice': {
     emoji:'🍗', color:'#c4440a',
@@ -1962,7 +1962,7 @@ function show(id){
 
 // ── MEAL OPTIONS ──
 const MEAL_OPTS = {
-  bf: ['Omelette/bhurji/scrambled','Power oatmeal','Bread+eggs (2)','Bread+eggs+avocado'],
+  bf: ['Omelette (4 eggs)','Power oatmeal','Bread+2 eggs+½ avocado','Bread+4 eggs+½ avocado'],
   lunch: ['Chicken+rice','Dal+veggies+rice','Rajma/channa','CAVA'],
   snack: ['Whey shake+avocado','Greek yogurt+berries','Whey shake+nuts'],
   dinner: ['Chicken+rice','Rice+eggs','Eggs only','Oatmeal']
@@ -1970,15 +1970,15 @@ const MEAL_OPTS = {
 
 const MEAL_COLORS = {
   'Chicken+rice':'#c4440a','Dal+veggies+rice':'#5a7a5a','Rajma/channa':'#c89b3c',
-  'CAVA':'#1d4e89','Omelette/bhurji/scrambled':'#7c3f00','Power oatmeal':'#5a7a5a','Whey shake+avocado':'#3a6a3a','Greek yogurt+berries':'#5a8a9a',
-  'Bread+eggs (2)':'#8a7a6a','Bread+eggs+avocado':'#3a6a3a',
+  'CAVA':'#1d4e89','Omelette (4 eggs)':'#7c3f00','Power oatmeal':'#5a7a5a','Whey shake+avocado':'#3a6a3a','Greek yogurt+berries':'#5a8a9a',
+  'Bread+2 eggs+½ avocado':'#8a7a6a','Bread+4 eggs+½ avocado':'#3a6a3a',
   'Whey shake+nuts':'#c4440a',
   'Rice+eggs':'#c89b3c','Eggs only':'#7c3f00','Oatmeal':'#5a7a5a'
 };
 
 const EGG_MEALS = {
-  'Omelette/bhurji/scrambled':4,'Bread+eggs (2)':2,
-  'Bread+eggs+avocado':3,'Rice+eggs':3,'Eggs only':5
+  'Omelette (4 eggs)':4,'Bread+2 eggs+½ avocado':2,
+  'Bread+4 eggs+½ avocado':4,'Rice+eggs':3,'Eggs only':5
 };
 
 const PROTEIN_MEALS = ['Chicken+rice','CAVA','Rice+eggs','Eggs only','Whey shake+nuts'];
@@ -2972,6 +2972,13 @@ function updateCalorieDisplay(){
     }
   });
   
+  // Add calories from manual eggs counter (70 cal per egg)
+  if(eggsCtr > 0) {
+    totalCal += eggsCtr * 70;
+    totalP += eggsCtr * 6;  // ~6g protein per egg
+    totalF += eggsCtr * 5;  // ~5g fat per egg
+  }
+  
   const proteinEl = document.getElementById('proteinAmount');
   const carbsEl = document.getElementById('carbsAmount');
   const fatEl = document.getElementById('fatAmount');
@@ -3008,6 +3015,7 @@ function resetAll(){
 function addEggs(n){
   eggsCtr = Math.max(0, (eggsCtr || 0) + n);
   updateEggDisplay();
+  updateCalorieDisplay();
 }
 
 function updateEggDisplay(){
