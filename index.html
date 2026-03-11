@@ -2991,6 +2991,7 @@ function updateCalorieDisplay(){
   // Add calories from EXTRA eggs (beyond what's in the meal)
   const extraEggs = Math.max(0, eggsCtr - baselineEggs);
   if(extraEggs > 0) {
+    if(isNaN(extraEggs)) throw new Error('extraEggs is NaN: eggsCtr=' + eggsCtr + ', baselineEggs=' + baselineEggs);
     totalCal += extraEggs * 70;
     totalP += extraEggs * 6;  // ~6g protein per egg
     totalF += extraEggs * 5;  // ~5g fat per egg
@@ -3030,7 +3031,10 @@ function resetAll(){
 
 // ── EGGS ──
 function addEggs(n){
+  if(baselineEggs === undefined) throw new Error('baselineEggs is undefined when addEggs called. Did breakfast selection save properly?');
+  const oldCtr = eggsCtr;
   eggsCtr = Math.max(0, (eggsCtr || 0) + n);
+  if(eggsCtr === oldCtr) throw new Error('addEggs did nothing: eggsCtr stayed at ' + oldCtr);
   updateEggDisplay();
   updateCalorieDisplay();
   saveTodayData();
