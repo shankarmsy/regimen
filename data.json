@@ -1,0 +1,38 @@
+{
+  "2026-03-10": {
+    "type": "run",
+    "checked": {
+      "Morning-0": true,
+      "Morning-1": true,
+      "Morning-2": true,
+      "Morning-3": true,
+      "Afternoon-0": true,
+      "Afternoon-1": true,
+      "Afternoon-2": true,
+      "Afternoon-3": true,
+      "Afternoon-5": true,
+      "Afternoon-4": true,
+      "Evening-0": true,
+      "Afternoon-6": true,
+      "Morning-4": true,
+      "Evening-1": true,
+      "Evening-2": true,
+      "Evening-4": true
+    },
+    "water": 3000,
+    "total": 22,
+    "done": 16,
+    "score": 73,
+    "meals": {
+      "bf": "Bread+eggs (4)",
+      "lunch": "Dal+veggies+rice",
+      "snack": "Whey shake+avocado"
+    }
+  },
+  "drinks_2026-03-10": {
+    "coffee": 1,
+    "tea": 0,
+    "mushroom": 2
+  },
+  "_v120_cleaned": true
+}

@@ -420,6 +420,15 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
         </div>
         <div class="water-count" id="waterCount" style="font-size:10px;color:var(--muted);"></div>
       </div>
+      <div class="water-section">
+        <div class="water-title">&#129370; Eggs</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+          <button class="water-add-btn" onclick="addEggs(-1)" style="border-color:#7c3f00;color:#7c3f00;">−</button>
+          <span id="eggCount" style="font-family:serif;font-size:24px;font-weight:700;color:#7c3f00;min-width:40px;text-align:center;">0</span>
+          <button class="water-add-btn" onclick="addEggs(1)" style="border-color:#7c3f00;color:#7c3f00;">+</button>
+        </div>
+        <div id="eggCountLabel" style="font-size:10px;color:var(--muted);"></div>
+      </div>
     </div>
     <div id="checklistContainer"></div>
   </div>
@@ -663,10 +672,10 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
   </div>
   <div id="sleepSub-log">
 <div class="sec-title">Sleep Log</div>
-  <p style="font-size:11px;color:var(--muted);margin-bottom:18px;">Log hours slept each night. Target: 7h 30min.</p>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:18px;">Log hours slept last night. Target: 7h 30min.</p>
   <div class="progress-card" style="margin-bottom:20px;">
     <div class="progress-header">
-      <div class="progress-title">Tonight's Sleep</div>
+      <div class="progress-title">Yesterday's Sleep</div>
       <span id="sleepTodayBadge" style="font-size:10px;color:var(--muted);"></span>
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
@@ -675,6 +684,10 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
         <input id="sleepHrsInput" type="number" min="0" max="12" step="0.25" placeholder="7.5"
           style="width:90px;font-family:monospace;font-size:22px;font-weight:600;border:1px solid var(--border);border-radius:5px;padding:6px 10px;background:var(--paper);color:var(--ink);text-align:center;"
           oninput="updateSleepPreview()">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <label style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Sleep time</label>
+        <div style="font-family:monospace;font-size:14px;font-weight:600;color:#4a3f7c;padding:5px 8px;background:var(--surface);border-radius:4px;min-width:80px;text-align:center;" id="sleepTimeDisplay">10:15pm</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;">
         <label style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Quality</label>
@@ -803,7 +816,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
     <p style="font-size:11px;color:var(--muted);margin-bottom:18px;">Log daily step count. Target: 10,000 steps.</p>
     <div class="progress-card" style="margin-bottom:20px;">
       <div class="progress-header">
-        <div class="progress-title">Today&#39;s Steps</div>
+        <div class="progress-title">Yesterday&#39;s Steps</div>
         <span id="stepsTodayBadge" style="font-size:10px;color:var(--muted);"></span>
       </div>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;">
@@ -893,6 +906,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 20px;}
     </div>
   </div>
 </div>
+
+  </div>
 </div>
 
 <div id="mainpanel-plan" class="mainpanel">
@@ -1203,11 +1218,6 @@ const MEAL_INFO = {
     ingredients:[['Whole wheat bread','2 slices'],['Eggs','2'],['Avocado','½'],['Butter','½ tsp']],
     macros:{P:'18g',C:'30g',F:'18g',Cal:'~350'}
   },
-  'Bread+eggs (4)': {
-    emoji:'🍞', color:'#8a7a6a',
-    ingredients:[['Whole wheat bread','2 slices'],['Eggs','4'],['Butter','½ tsp']],
-    macros:{P:'28g',C:'28g',F:'18g',Cal:'~390'}
-  },
   'Bread+eggs+avocado': {
     emoji:'🥑', color:'#3a6a3a',
     ingredients:[['Whole wheat bread','2 slices'],['Eggs','3'],['Avocado','½'],['Salt, lemon','to taste']],
@@ -1235,29 +1245,19 @@ const MEAL_INFO = {
   },
   'Whey shake+nuts': {
     emoji:'🥤', color:'#c4440a',
-    ingredients:[['Whey protein','1–2 scoops'],['A2 milk or water','300ml'],['Mixed nuts','20g']],
+    ingredients:[['Whey protein','1–2 scoops'],['Almond milk or water','300ml'],['Mixed nuts','20g']],
     macros:{P:'32g',C:'10g',F:'10g',Cal:'~260'}
   },
 
-  'Avocado+nuts': {
-    emoji:'🥑', color:'#3a6a3a',
-    ingredients:[['Avocado','½'],['Almonds / walnuts','25g'],['Salt, lemon','pinch']],
-    macros:{P:'6g',C:'10g',F:'22g',Cal:'~260'}
-  },
   'Whey shake+avocado': {
     emoji:'🥑', color:'#3a6a3a',
-    ingredients:[['Whey protein','1 scoop'],['A2 milk or water','300ml'],['Avocado','½'],['Chia seeds (soaked)','1 tbsp']],
+    ingredients:[['Whey protein','1 scoop'],['Almond milk or water','300ml'],['Avocado','½'],['Chia seeds (soaked)','1 tbsp']],
     macros:{P:'30g',C:'14g',F:'16g',Cal:'~320'}
   },
   'Greek yogurt+berries': {
     emoji:'🫙', color:'#5a8a9a',
     ingredients:[['Greek yogurt (full fat)','1 cup'],['Mixed berries','½ cup'],['Honey','1 tsp'],['+ 10g nuts OR 1 tbsp chia','optional']],
     macros:{P:'20g',C:'22g',F:'11g',Cal:'~260'}
-  },
-  'Skipped': {
-    emoji:'⏭️', color:'#d4c8b4',
-    ingredients:[['—','—']],
-    macros:{P:'0g',C:'0g',F:'0g',Cal:'0'}
   },
   'Rice+eggs': {
     emoji:'🍳', color:'#c89b3c',
@@ -1271,7 +1271,7 @@ const MEAL_INFO = {
   },
   'Oatmeal': {
     emoji:'🥣', color:'#5a7a5a',
-    ingredients:[['Rolled oats','½ cup'],['A2 milk','200ml'],['Banana','½'],['Mixed nuts','20g'],['Cinnamon','pinch']],
+    ingredients:[['Rolled oats','½ cup'],['Almond milk','200ml'],['Banana','½'],['Mixed nuts','20g'],['Cinnamon','pinch']],
     macros:{P:'13g',C:'42g',F:'12g',Cal:'~330'}
   }
 };
@@ -1324,11 +1324,11 @@ function moveMealTip(e){
 // ── SLEEP ──────────────────────────────────────────────────────
 const SLEEP_PFX='sleep_';
 let _sleepQ='';
-function sleepDayKey(d){ return SLEEP_PFX+(d||todayKey()); }
+function sleepDayKey(d){ return SLEEP_PFX+(d||yesterdayKey()); }
 function saveSleepLog(){
   const hrs=parseFloat(document.getElementById('sleepHrsInput').value);
   if(isNaN(hrs)||hrs<=0){alert('Enter hours slept');return;}
-  const s=loadStore(); s[sleepDayKey()]={hrs,quality:_sleepQ||'ok',date:todayKey()}; saveStore(s);
+  const s=loadStore(); s[sleepDayKey()]={hrs,quality:_sleepQ||'ok',date:yesterdayKey()}; saveStore(s);
   const m=document.getElementById('sleepSaveMsg'); m.textContent='✓ Saved';
   setTimeout(()=>m.textContent='',2500);
   renderSleepStats(); renderSleepChart();
@@ -1339,6 +1339,50 @@ function setSleepQuality(q,btn){
   const c={poor:'var(--rust)',ok:'var(--gold,#c89b3c)',good:'var(--sage)',great:'#1d4e89'};
   btn.style.background=c[q]; btn.style.color='#fff'; btn.style.borderColor=c[q];
 }
+function updateSleepTimeDisplay(){
+  // Sleep log shows yesterday's sleep, but needs to check the date being viewed (activeEditKey) for badminton
+  // activeEditKey is the date currently selected in the calendar
+  const store = loadStore();
+  const viewingDate = activeEditKey; // The date we're viewing (could be today, yesterday, or any day)
+  const viewingData = store[viewingDate]; // Get that day's data
+  
+  let hasBadminton = false;
+  
+  if(viewingData && viewingData.checked) {
+    // Check if any badminton item was checked on the viewing date
+    hasBadminton = Object.keys(viewingData.checked).some(key => {
+      // Check if this key corresponds to a badminton item
+      if(key === 'extra-badminton') return true;
+      // Also check if it's a built-in badminton from the day type
+      const match = key.match(/^(\w+)-(\d+)$/);
+      if(match) {
+        const dayType = viewingData.type; // Get the day type (run, workout, etc)
+        const data = DAYS[dayType];
+        if(data) {
+          const [group, idx] = [match[1], parseInt(match[2])];
+          const item = data[group] && data[group][idx];
+          if(item && /\bbadminton\b/i.test(item.text)) return true;
+        }
+      }
+      return false;
+    });
+  }
+  
+  const display = document.getElementById('sleepTimeDisplay');
+  if(!display) return;
+  
+  // If badminton was done on the viewing date, sleep time is 11:15pm
+  // Otherwise standard sleep time is 10:15pm
+  if(hasBadminton) {
+    display.textContent = '11:15pm';
+    display.style.color = '#c4440a'; // Rust color for late night
+  } else {
+    display.textContent = '10:15pm';
+    display.style.color = '#4a3f7c'; // Purple color for normal
+  }
+}
+
+
 function updateSleepPreview(){
   const hrs=parseFloat(document.getElementById('sleepHrsInput').value);
   const el=document.getElementById('sleepPreview');
@@ -1346,12 +1390,14 @@ function updateSleepPreview(){
   if(isNaN(hrs)||hrs<=0){el.textContent='';return;}
   const d=(hrs-7.5).toFixed(1);
   el.innerHTML=hrs>=7.5?`<span style="color:var(--sage)">+${d}h over target ✓</span>`:`<span style="color:var(--rust)">${d}h under target</span>`;
+  updateSleepTimeDisplay();
 }
 function loadSleepToday(){
   const d=loadStore()[sleepDayKey()];
   const inp=document.getElementById('sleepHrsInput'); if(!inp) return;
   if(d){inp.value=d.hrs;_sleepQ=d.quality||'ok';}else{inp.value='';_sleepQ='';}
   updateSleepPreview();
+  updateSleepTimeDisplay();
   if(_sleepQ){
     document.querySelectorAll('.sleep-q-btn').forEach(b=>{if(b.textContent.trim().toLowerCase()===_sleepQ) setSleepQuality(_sleepQ,b);});
   }
@@ -1598,12 +1644,13 @@ function showMain(tab){
     currentType = (_hasData && _d.type) ? _d.type : defaultTypeForDate(activeEditKey);
     checked = _d.checked || {};
     waterMl = _d.water || 0;
+    eggsCtr = _d.eggs || 0;
     document.querySelectorAll('.dtoggle-btn').forEach(b => {
       const t = b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
       b.classList.toggle('active', t === currentType);
     });
     buildDateBar();
-    renderMealOpts(); renderChecklist(); renderDrinksDisplay();
+    renderMealOpts(); renderChecklist(); renderDrinksDisplay(); updateEggDisplay();
   }
 }
 
@@ -1677,24 +1724,23 @@ function show(id){
 
 // ── MEAL OPTIONS ──
 const MEAL_OPTS = {
-  bf: ['Omelette/bhurji/scrambled','Power oatmeal','Bread+eggs (2)','Bread+eggs (4)','Bread+eggs+avocado'],
+  bf: ['Omelette/bhurji/scrambled','Power oatmeal','Bread+eggs (2)','Bread+eggs+avocado'],
   lunch: ['Chicken+rice','Dal+veggies+rice','Rajma/channa','CAVA'],
-  snack: ['Whey shake+avocado','Greek yogurt+berries','Whey shake+nuts','Avocado+nuts','Skipped'],
+  snack: ['Whey shake+avocado','Greek yogurt+berries','Whey shake+nuts'],
   dinner: ['Chicken+rice','Rice+eggs','Eggs only','Oatmeal']
 };
 
 const MEAL_COLORS = {
   'Chicken+rice':'#c4440a','Dal+veggies+rice':'#5a7a5a','Rajma/channa':'#c89b3c',
   'CAVA':'#1d4e89','Omelette/bhurji/scrambled':'#7c3f00','Power oatmeal':'#5a7a5a','Whey shake+avocado':'#3a6a3a','Greek yogurt+berries':'#5a8a9a',
-  'Bread+eggs (2)':'#8a7a6a','Bread+eggs (4)':'#8a7a6a','Bread+eggs+avocado':'#3a6a3a',
-  'Whey shake+nuts':'#c4440a','Avocado+nuts':'#3a6a3a',
-  'Skipped':'#d4c8b4','Rice+eggs':'#c89b3c','Eggs only':'#7c3f00','Oatmeal':'#5a7a5a'
+  'Bread+eggs (2)':'#8a7a6a','Bread+eggs+avocado':'#3a6a3a',
+  'Whey shake+nuts':'#c4440a',
+  'Rice+eggs':'#c89b3c','Eggs only':'#7c3f00','Oatmeal':'#5a7a5a'
 };
 
 const EGG_MEALS = {
-  'Omelette/bhurji/scrambled':4,'Bread+eggs (2)':2,'Bread+eggs (4)':4,
-  'Bread+eggs+avocado':3,'Rice+eggs':2,'Eggs only':3,'Avocado toast + eggs':3,'Whey shake+avocado':1,'Greek yogurt+berries':1,
-  'PB toast + boiled eggs':3
+  'Omelette/bhurji/scrambled':4,'Bread+eggs (2)':2,
+  'Bread+eggs+avocado':3,'Rice+eggs':3,'Eggs only':5
 };
 
 const PROTEIN_MEALS = ['Chicken+rice','CAVA','Rice+eggs','Eggs only','Whey shake+nuts'];
@@ -1801,6 +1847,17 @@ function renderMealOpts() {
 
         // Rebuild charts (but not the opts DOM)
         renderMealCharts();
+        
+        // Auto-populate eggs counter for breakfast meals
+        if (slot === 'bf' && nowSelected) {
+          const eggCount = EGG_MEALS[opt] || 0;
+          eggsCtr = eggCount;
+          updateEggDisplay();
+        } else if (slot === 'bf' && !nowSelected) {
+          // Deselected breakfast - reset egg counter
+          eggsCtr = 0;
+          updateEggDisplay();
+        }
       }
 
       btn.addEventListener('click', handleActivate);
@@ -2151,6 +2208,12 @@ function todayKey(){
   return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
 }
 
+function yesterdayKey(){
+  const d=new Date();
+  d.setDate(d.getDate()-1);
+  return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
+}
+
 // Active edit date — defaults to today, can be set to any of last 7 days
 let activeEditKey = todayKey();
 
@@ -2191,6 +2254,7 @@ function setActiveDate(key) {
   renderChecklist();
   renderMealOpts();
   renderDrinksDisplay();
+  updateSleepTimeDisplay(); // Update sleep time when switching dates
 }
 
 function buildDateBar() {
@@ -2228,20 +2292,20 @@ const DAYS = {
       {t:"9:30am",text:"Black coffee #1 — no sugar",tag:"tag-coffee"},
     ],
     Afternoon:[
-      {t:"10:30am",text:"Water 300ml",tag:"tag-water"},
-      {t:"12:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"10:30am",text:"Water 500ml",tag:"tag-water"},
+      {t:"12:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"12:30pm",text:"Lunch — protein before rice · papad for crunch",tag:"tag-food"},
       {t:"1:00pm",text:"Black coffee #2 — LAST caffeine of day",tag:"tag-coffee"},
-      {t:"3:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"3:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"3:30pm",text:"Snack + whey (1sc A2 if chicken, 2sc water if not) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
     ],
     Evening:[
-      {t:"5:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"5:30pm",text:"Dinner (lighter than lunch) + metformin + fish oil",tag:"tag-food"},
       {t:"6:00pm",text:"EATING WINDOW CLOSED",tag:"tag-warn"},
       {t:"6:15pm",text:"Post-dinner walk 15–20 min",tag:"tag-move"},
       {t:"8:00pm",text:"Badminton 8–10:30pm",tag:"tag-move"},
-      {t:"8:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"8:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"9:30pm",text:"Rosuvastatin + Losartan + Magnesium 300mg",tag:"tag-med"},
       {t:"10:00pm",text:"Water 200ml — last of day",tag:"tag-water"},
       {t:"10:15pm",text:"Sleep — 7h 30min target",tag:"tag-sleep"},
@@ -2257,20 +2321,20 @@ const DAYS = {
       {t:"9:30am",text:"Black coffee #1 — no sugar",tag:"tag-coffee"},
     ],
     Afternoon:[
-      {t:"10:30am",text:"Water 300ml",tag:"tag-water"},
+      {t:"10:30am",text:"Water 500ml",tag:"tag-water"},
       {t:"12:00pm",text:"Run 25–30 min",tag:"tag-move"},
-      {t:"12:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"12:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"12:30pm",text:"Lunch — protein before rice",tag:"tag-food"},
       {t:"1:00pm",text:"Black coffee #2 — LAST caffeine",tag:"tag-coffee"},
-      {t:"3:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"3:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"3:30pm",text:"Snack + whey (2sc water) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
     ],
     Evening:[
-      {t:"5:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"5:30pm",text:"Dinner (lighter than lunch) + metformin + fish oil",tag:"tag-food"},
       {t:"6:00pm",text:"EATING WINDOW CLOSED",tag:"tag-warn"},
       {t:"6:15pm",text:"Post-dinner walk 15–20 min",tag:"tag-move"},
-      {t:"8:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"8:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"9:30pm",text:"Rosuvastatin + Losartan + Magnesium 300mg",tag:"tag-med"},
       {t:"9:30pm",text:"THU NIGHT: Soak almonds (10) + walnuts (10) + pistachios (10) → covers Fri/Sat/Sun",tag:"tag-food"},
       {t:"10:00pm",text:"Water 200ml — last of day",tag:"tag-water"},
@@ -2288,18 +2352,18 @@ const DAYS = {
       {t:"9:45am",text:"Big breakfast — psyllium 1 tsp in water, chug fast",tag:"tag-food"},
     ],
     Afternoon:[
-      {t:"10:30am",text:"Water 300ml",tag:"tag-water"},
+      {t:"10:30am",text:"Water 500ml",tag:"tag-water"},
       {t:"1:00pm",text:"Lunch — CAVA or chicken+rice",tag:"tag-food"},
-      {t:"2:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"2:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"4:00pm",text:"Snack + whey (1sc water if CAVA) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
-      {t:"5:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
     ],
     Evening:[
       {t:"5:30pm",text:"Light dinner + metformin + fish oil",tag:"tag-food"},
       {t:"6:00pm",text:"EATING WINDOW CLOSED",tag:"tag-warn"},
       {t:"6:15pm",text:"Walk 15 min",tag:"tag-move"},
       {t:"8:00pm",text:"Badminton 8–10:30pm",tag:"tag-move"},
-      {t:"8:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"8:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"9:30pm",text:"Rosuvastatin + Losartan + Magnesium 300mg",tag:"tag-med"},
     ]
   },
@@ -2314,18 +2378,18 @@ const DAYS = {
     ],
     Afternoon:[
       {t:"11:15am",text:"Post-VB: whey + banana",tag:"tag-food"},
-      {t:"12:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"12:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"1:00pm",text:"Lunch — CAVA or chicken+rice",tag:"tag-food"},
       {t:"1:00pm",text:"Black coffee #1 — LAST caffeine",tag:"tag-coffee"},
-      {t:"3:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"3:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"3:30pm",text:"Snack + whey (1sc A2 or water) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
     ],
     Evening:[
-      {t:"5:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"5:30pm",text:"Dinner + metformin + fish oil",tag:"tag-food"},
       {t:"6:00pm",text:"EATING WINDOW CLOSED",tag:"tag-warn"},
       {t:"6:15pm",text:"Walk 15–20 min",tag:"tag-move"},
-      {t:"8:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"8:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"9:30pm",text:"Rosuvastatin + Losartan + Magnesium 300mg",tag:"tag-med"},
       {t:"9:30pm",text:"SUNDAY NIGHT: Soak almonds (10) + walnuts (10) + pistachios (10) → covers Mon/Tue/Wed",tag:"tag-food"},
       {t:"10:00pm",text:"Water 200ml — last of day",tag:"tag-water"},
@@ -2342,19 +2406,19 @@ const DAYS = {
       {t:"9:30am",text:"Black coffee #1",tag:"tag-coffee"},
     ],
     Afternoon:[
-      {t:"10:30am",text:"Water 300ml",tag:"tag-water"},
-      {t:"12:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"10:30am",text:"Water 500ml",tag:"tag-water"},
+      {t:"12:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"12:30pm",text:"Lunch — protein before rice",tag:"tag-food"},
       {t:"1:00pm",text:"Black coffee #2 — LAST caffeine",tag:"tag-coffee"},
-      {t:"3:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"3:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"3:30pm",text:"Snack + whey (2sc water) + soaked chia + soaked almonds/walnuts + soaked pistachios + seeds dry + 2 Brazil nuts + handful spinach in shake",tag:"tag-food"},
     ],
     Evening:[
-      {t:"5:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"5:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"5:30pm",text:"Dinner + metformin + fish oil",tag:"tag-food"},
       {t:"6:00pm",text:"EATING WINDOW CLOSED",tag:"tag-warn"},
       {t:"6:15pm",text:"Walk 15–20 min",tag:"tag-move"},
-      {t:"8:00pm",text:"Water 300ml",tag:"tag-water"},
+      {t:"8:00pm",text:"Water 500ml",tag:"tag-water"},
       {t:"9:30pm",text:"Rosuvastatin + Losartan + Magnesium 300mg",tag:"tag-med"},
       {t:"10:00pm",text:"Water 200ml — last of day",tag:"tag-water"},
       {t:"10:15pm",text:"Sleep — 7h 30min target",tag:"tag-sleep"},
@@ -2376,6 +2440,7 @@ function defaultTypeForDate(dateKey) {
 let currentType = defaultTypeForDate(todayKey());
 let checked = {};
 let waterMl = 0;
+let eggsCtr = 0;
 
 function setDayType(type, btn){
   const key = activeEditKey;
@@ -2450,17 +2515,38 @@ function renderChecklist(){
   }
 
   updateProgress();
+  updateSleepTimeDisplay();
 }
 
 function toggleExtra(key){
   checked[key] = !checked[key];
   saveTodayData();
   renderChecklist();
+  // Update sleep time if badminton was toggled
+  if(key === 'extra-badminton') {
+    updateSleepTimeDisplay();
+  }
 }
 
 function toggleItem(group,i){
   const key = group+'-'+i;
+  const data = DAYS[currentType];
+  const item = data[group][i];
+  
   checked[key] = !checked[key];
+  
+  // If water item: add 500ml when checking, subtract when unchecking
+  if (item && item.text && /\bwater\b/i.test(item.text) && item.text.includes('500ml')) {
+    if (checked[key]) {
+      // Checking: add 500ml
+      waterMl = (waterMl || 0) + 500;
+    } else {
+      // Unchecking: subtract 500ml (min 0)
+      waterMl = Math.max(0, (waterMl || 0) - 500);
+    }
+    updateWaterDisplay();
+  }
+  
   saveTodayData();
   renderChecklist();
 }
@@ -2504,8 +2590,10 @@ function saveTodayData(){
   });
   // Preserve meals and drinks data already on this key
   const meals = store[key].meals;
-  store[key] = { type:currentType, checked:{...checked}, water:waterMl, total, done, score: total>0?Math.round(done/total*100):0 };
+  const eggs = store[key].eggs;
+  store[key] = { type:currentType, checked:{...checked}, water:waterMl, eggs:eggsCtr, total, done, score: total>0?Math.round(done/total*100):0 };
   if(meals) store[key].meals = meals;
+  if(eggs) store[key].eggs = eggs;
   saveStore(store);
   buildDateBar(); // refresh has-data indicators
   renderHeatmap();
@@ -2527,10 +2615,24 @@ function updateProgress(){
 }
 
 function resetAll(){
-  checked={};waterMl=0;
+  checked={};waterMl=0;eggsCtr=0;
   saveTodayData();
   renderChecklist();
 }
+
+// ── EGGS ──
+function addEggs(n){
+  eggsCtr = Math.max(0, (eggsCtr || 0) + n);
+  updateEggDisplay();
+}
+
+function updateEggDisplay(){
+  const cnt = document.getElementById('eggCount');
+  if(cnt) cnt.textContent = eggsCtr;
+  const lbl = document.getElementById('eggCountLabel');
+  if(lbl) lbl.textContent = eggsCtr + ' eggs logged today';
+}
+
 
 // ── HEATMAP ──
 const START_DATE = new Date('2026-03-04');
@@ -3549,7 +3651,7 @@ function skeletonLineChart(elId, note){
 
 
 // ── STEPS ──────────────────────────────────────────────────────────
-function stepsKey(d){ return 'steps_'+(d||todayKey()); }
+function stepsKey(d){ return 'steps_'+(d||yesterdayKey()); }
 
 function loadStepsToday(){
   const inp = document.getElementById('stepsInput');
@@ -3574,7 +3676,7 @@ function saveSteps(){
   const v = parseInt(document.getElementById('stepsInput').value || '0');
   if (!v) { alert('Enter step count'); return; }
   const s = loadStore();
-  s[stepsKey()] = { steps: v, date: todayKey() };
+  s[stepsKey()] = { steps: v, date: yesterdayKey() };
   saveStore(s);
   const m = document.getElementById('stepsSaveMsg');
   m.textContent = '\u2713 Saved';
@@ -3775,6 +3877,23 @@ function _renderRunLine(elId, runs){
 
 // ── BOOT ────────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Clean all data before today — but only on v1.20 upgrade
+  const store = loadStore();
+  const today = todayKey();
+  
+  // Only clean pre-today data on first v1.20 load
+  if (!store._v120_cleaned) {
+    const cleaned = {};
+    // Keep today's data and any keys with valid data
+    Object.keys(store).forEach(k => {
+      if (k === today || k === '_v120_cleaned') {
+        cleaned[k] = store[k];
+      }
+    });
+    cleaned._v120_cleaned = true; // Mark cleanup done
+    saveStore(cleaned);
+  }
+  
   showMain('today');
   initWithSync();
 });

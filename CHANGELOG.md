@@ -3,6 +3,30 @@
 All notable changes to Shankar's Regimen tracker are documented here.  
 Format: `[vX.Y] YYYY-MM-DD — description`
 
+## [v1.20] 2026-03-10 — Eggs tracking in checklist + Habits chart, 500ml water units, yesterday sleep/steps, badminton sleep auto-adjust
+
+- **Sleep time auto-adjust:** If Badminton checked (8-10:30pm), sleep time updates to 11:15pm (rust color). Default 10:15pm (purple).
+  - Works for built-in Badminton items (Sat day type, Workout/Run days)
+  - Works for Extra Badminton (optional item added if not in plan)
+  - Display shows in Track > Sleep log section
+- **Eggs tracking (2 places):**
+  - **Checklist:** Counter below water with +/− buttons; auto-populates from breakfast meal selections
+  - **Habits:** Weekly egg count chart (Last 30 Days) shows total eggs per week, calculated from logged meals
+- **Water intake:** Updated from 300ml to 500ml per check-in; checklist water items now AUTO-INCREMENT water counter by 500ml when checked
+- **Water uncheck:** Unchecking water items subtracts 500ml from counter (min 0)
+- **Sleep & Steps:** Changed to track yesterday's data (not today's). Tab labels updated: "Tonight's Sleep" → "Yesterday's Sleep", "Today's Steps" → "Yesterday's Steps"
+- **Meals updated:**
+  - Removed "Bread+eggs (4)" (3-egg option only)
+  - Removed "Avocado+nuts" snack option
+  - Removed "Skipped" option from snacks
+  - All A2 milk replaced with Almond milk in Whey shake recipes and Oatmeal
+  - EGG_MEALS updated to track correct egg counts per meal
+- **Data cleanup:** ONE-TIME on v1.20 upgrade (deletes all data before today, keeps today's data, sets `_v120_cleaned` flag to prevent re-running)
+- **Water checklist sync:** Checking "Water 500ml" items in checklist automatically adds 500ml to water counter; unchecking subtracts
+- **Bug fixes:** Data cleanup flag prevents daily wipes; full data retention after initial cleanup
+
+---
+
 ## [v1.19] 2026-03-05 — Meal card updates
 
 - Bread+eggs (2): added ½ avocado (~350 cal, 18g P)
