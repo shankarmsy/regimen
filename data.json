@@ -1,21 +1,4 @@
 {
-  "2026-03-04": {
-    "type": "workout",
-    "checked": {}
-  },
-  "2026-03-05": {
-    "type": "workout",
-    "checked": {}
-  },
-  "2026-03-03": {
-    "type": "workout",
-    "checked": {}
-  },
-  "2026-03-09": {
-    "meals": {
-      "bf": "Omelette/bhurji/scrambled"
-    }
-  },
   "2026-03-10": {
     "type": "run",
     "checked": {
@@ -48,12 +31,12 @@
       "bf": "Bread+4 eggs+½ avocado"
     }
   },
+  "_v120_cleaned": true,
   "drinks_2026-03-10": {
     "coffee": 1,
     "tea": 0,
     "mushroom": 2
   },
-  "_v120_cleaned": true,
   "2026-03-11": {
     "type": "workout",
     "checked": {
@@ -68,17 +51,36 @@
       "Afternoon-2": true,
       "Afternoon-1": true,
       "Afternoon-3": true,
-      "Afternoon-5": true
+      "Afternoon-5": true,
+      "Evening-0": true,
+      "Evening-1": true
     },
-    "water": 2000,
+    "water": 2500,
     "eggs": 4,
     "total": 23,
-    "done": 12,
-    "score": 52,
+    "done": 14,
+    "score": 61,
     "meals": {
       "lunch": "CAVA",
       "snack": "Whey 2sc+avocado+nuts+spinach",
       "bf": "Bread+4 eggs+½ avocado"
+    }
+  },
+  "2026-03-04": {
+    "type": "workout",
+    "checked": {}
+  },
+  "2026-03-05": {
+    "type": "workout",
+    "checked": {}
+  },
+  "2026-03-03": {
+    "type": "workout",
+    "checked": {}
+  },
+  "2026-03-09": {
+    "meals": {
+      "bf": "Omelette/bhurji/scrambled"
     }
   },
   "drinks_2026-03-11": {
