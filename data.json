@@ -144,13 +144,14 @@
       "Morning-0": true,
       "Morning-1": true,
       "Morning-5": true,
-      "Morning-4": true
+      "Morning-4": true,
+      "Morning-2": true
     },
     "water": 1000,
     "eggs": 4,
     "total": 23,
-    "done": 4,
-    "score": 17,
+    "done": 5,
+    "score": 22,
     "meals": {
       "bf": "Bread+4 eggs+½ avocado"
     }
