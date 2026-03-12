@@ -54,13 +54,14 @@
       "Afternoon-5": true,
       "Evening-0": true,
       "Evening-1": true,
-      "Evening-2": true
+      "Evening-2": true,
+      "Evening-3": true
     },
     "water": 2500,
     "eggs": 4,
     "total": 23,
-    "done": 15,
-    "score": 65,
+    "done": 16,
+    "score": 70,
     "meals": {
       "lunch": "CAVA",
       "snack": "Whey 2sc+avocado+nuts+spinach",
