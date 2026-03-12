@@ -145,15 +145,21 @@
       "Morning-1": true,
       "Morning-5": true,
       "Morning-4": true,
-      "Morning-2": true
+      "Morning-2": true,
+      "Morning-3": true
     },
     "water": 1000,
     "eggs": 4,
     "total": 23,
-    "done": 5,
-    "score": 22,
+    "done": 6,
+    "score": 26,
     "meals": {
       "bf": "Bread+4 eggs+½ avocado"
     }
+  },
+  "drinks_2026-03-12": {
+    "coffee": 0,
+    "tea": 0,
+    "mushroom": 1
   }
 }
