@@ -147,13 +147,16 @@
       "Morning-4": true,
       "Morning-2": true,
       "Morning-3": true,
-      "Afternoon-0": true
+      "Afternoon-0": true,
+      "Afternoon-2": true,
+      "Afternoon-3": true,
+      "Afternoon-4": false
     },
-    "water": 1500,
+    "water": 2000,
     "eggs": 4,
     "total": 23,
-    "done": 7,
-    "score": 30,
+    "done": 9,
+    "score": 39,
     "meals": {
       "bf": "Bread+4 eggs+½ avocado"
     }
