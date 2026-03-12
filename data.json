@@ -145,9 +145,12 @@
       "Morning-1": true
     },
     "water": 500,
-    "eggs": 0,
+    "eggs": 4,
     "total": 23,
     "done": 2,
-    "score": 9
+    "score": 9,
+    "meals": {
+      "bf": "Bread+4 eggs+½ avocado"
+    }
   }
 }
