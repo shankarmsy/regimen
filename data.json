@@ -197,13 +197,14 @@
       "Morning-4": true,
       "Morning-5": true,
       "Morning-6": true,
-      "Morning-2": true
+      "Morning-2": true,
+      "Afternoon-0": true
     },
-    "water": 1000,
+    "water": 1500,
     "eggs": 0,
     "total": 23,
-    "done": 6,
-    "score": 26,
+    "done": 7,
+    "score": 30,
     "meals": {
       "dinner": "Chicken+rice"
     }
